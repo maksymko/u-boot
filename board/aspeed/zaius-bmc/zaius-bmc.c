@@ -88,7 +88,7 @@ static int fru_checksum(void *data, size_t len)
 	uint8_t *p = (uint8_t *) data;
 
 	size_t i = 0;
-	for (; i < len; ++i) {
+	for (; i < len; ++i, ++p) {
 		result += *p;
 	}
 
