@@ -1,3 +1,4 @@
 source "board/aspeed/ast-g5/Kconfig"
 source "board/aspeed/ast-g4/Kconfig"
 source "board/aspeed/witherspoon-bmc/Kconfig"
+source "board/aspeed/zaius-bmc/Kconfig"
