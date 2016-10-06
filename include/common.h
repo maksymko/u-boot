@@ -8,6 +8,10 @@
 #ifndef __COMMON_H_
 #define __COMMON_H_	1
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
 #ifndef __ASSEMBLY__		/* put C only stuff in this section */
 
 typedef unsigned char		uchar;

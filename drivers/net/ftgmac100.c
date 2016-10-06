@@ -321,6 +321,8 @@ static int ftgmac100_phy_init(struct eth_device *dev)
 	/* Check if the PHY is up to snuff... */
 	for (phy_addr = 0; phy_addr < CONFIG_PHY_MAX_ADDR; phy_addr++) {
 
+		u16 mii_phyaddr;
+		ftgmac100_phy_read(dev, phy_addr, MII_PHYADDR, &mii_phyaddr);
 		ftgmac100_phy_read(dev, phy_addr, MII_PHYSID1, &phy_id1);
 		ftgmac100_phy_read(dev, phy_addr, MII_PHYSID2, &phy_id2);
 
@@ -329,8 +331,8 @@ static int ftgmac100_phy_init(struct eth_device *dev)
 		 * the interface usually return 0xffff or 0x0000
 		 */
 		if (phy_id1 != 0xffff && phy_id1 != 0x0) {
-//			printf("%s: found PHY at 0x%02x\n",
-//				dev->name, phy_addr);
+			debug("%s: PHY at 0x%02x, id1:0x%04x, id2:0x%04x, phy_addr: %04x\n",
+				  dev->name, phy_addr, phy_id1, phy_id2, mii_phyaddr);
 			priv->phy_addr = phy_addr;
 			break;
 		}
