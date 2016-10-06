@@ -1,1 +1,1 @@
-obj-y   = ast-g4.o platform.o
+obj-y   = ast-g4.o
