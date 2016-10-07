@@ -21,4 +21,4 @@
 # MA 02111-1307 USA
 #
 
-obj-y   = zaius-bmc.o platform.o
+obj-y   = zaius-bmc.o
