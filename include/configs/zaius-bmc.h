@@ -22,9 +22,9 @@
 /* Ethernet */
 #define CONFIG_LIB_RAND
 #define CONFIG_FTGMAC100
+#define CONFIG_MAC_NUM 2
 
 #define CONFIG_PHY_MAX_ADDR	32	/* this comes from <linux/phy.h> */
-#define CONFIG_FTGMAC100_EGIGA
 
 /* FRU EEPROM */
 #define CONFIG_EEPROM_I2C_BUS_NUM			(1)
