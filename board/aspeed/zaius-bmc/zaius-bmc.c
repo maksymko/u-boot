@@ -42,6 +42,12 @@
 #include <asm/arch/ast-sdmc.h>
 #include <asm/io.h>
 
+/* TODO: Move this to GPIO specific file */
+#define AST_GPIO_BASE			(0x1e780000)
+#define GPIO_DVR			(0x0)
+#define GPIO_DDR			(0x4)
+#define GPIO_D3			(1 << 27)
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define RETURN_IF_ERROR(expr) do {\
@@ -143,10 +149,25 @@ int dram_init(void)
 	return 0;
 }
 
-#ifdef CONFIG_CMD_NET
+static void reset_phy(void)
+{
+	// DDR.
+	setbits_le32(AST_GPIO_BASE + GPIO_DDR, GPIO_D3);
+	clrbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
+	mdelay(2);
+	setbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
+}
+
 int board_eth_init(bd_t *bd)
 {
+	reset_phy();
+#if defined(CONFIG_EEPROM_I2C_ADDR) && defined(CONFIG_EEPROM_I2C_BUS_NUM)
 	read_macs_from_fru();
-	return ftgmac100_initialize(bd);
-}
 #endif
+
+#ifdef CONFIG_FTGMAC100
+	return ftgmac100_initialize(bd);
+#elif defined(CONFIG_ASPEEDNIC)
+	return aspeednic_initialize(bd);
+#endif
+}
