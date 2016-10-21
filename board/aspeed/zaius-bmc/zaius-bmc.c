@@ -103,6 +103,7 @@ static int fru_checksum(void *data, size_t len)
 
 static void read_macs_from_fru(void)
 {
+	debug("Setting MACs from FRU\n");
 	struct udevice *eeprom;
 	RETURN_IF_ERROR(i2c_get_chip_for_busnum
 			(CONFIG_EEPROM_I2C_BUS_NUM, CONFIG_EEPROM_I2C_ADDR, 1,
@@ -152,6 +153,7 @@ int dram_init(void)
 static void reset_phy(void)
 {
 	// DDR.
+	debug("Resetting PHY\n");
 	setbits_le32(AST_GPIO_BASE + GPIO_DDR, GPIO_D3);
 	clrbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
 	mdelay(2);
@@ -160,9 +162,12 @@ static void reset_phy(void)
 
 int board_eth_init(bd_t *bd)
 {
+	debug("Board ETH init\n");
 	reset_phy();
 #if defined(CONFIG_EEPROM_I2C_ADDR) && defined(CONFIG_EEPROM_I2C_BUS_NUM)
 	read_macs_from_fru();
+#else
+	debug("FRU EEPROM not configured.\n");
 #endif
 
 #ifdef CONFIG_FTGMAC100
