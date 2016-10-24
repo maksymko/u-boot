@@ -56,10 +56,10 @@ static void ast_i2c_init_bus(struct ast_i2c *i2c_bus)
 	writel(0, &i2c_bus->regs->fcr);
 	/* Enable Master Mode. Assuming single-master. */
 	debug("Enable Master for %p\n", i2c_bus->regs);
-	setbits_le32(&i2c_bus->regs->fcr,
-		     AST_I2CD_MASTER_EN
-		     | AST_I2CD_M_SDA_LOCK_EN
-		     | AST_I2CD_MULTI_MASTER_DIS | AST_I2CD_M_SCL_DRIVE_EN);
+	writel(AST_I2CD_MASTER_EN
+	       | AST_I2CD_M_SDA_LOCK_EN
+	       | AST_I2CD_MULTI_MASTER_DIS | AST_I2CD_M_SCL_DRIVE_EN,
+	       &i2c_bus->regs->fcr);
 	debug("FCR: %p\n", &i2c_bus->regs->fcr);
 	/* Enable Interrupts */
 	writel(AST_I2CD_INTR_TX_ACK
@@ -69,6 +69,8 @@ static void ast_i2c_init_bus(struct ast_i2c *i2c_bus)
 	       | AST_I2CD_INTR_NORMAL_STOP
 	       | AST_I2CD_INTR_ABNORMAL, &i2c_bus->regs->icr);
 }
+
+static int ast_i2c_deblock(struct udevice *dev);
 
 static int ast_i2c_probe(struct udevice *dev)
 {
@@ -82,6 +84,7 @@ static int ast_i2c_probe(struct udevice *dev)
 	    (struct ast_i2c_regs *)dev_get_addr(dev);
 	i2c_bus->regs = i2c_base;
 
+	ast_i2c_deblock(dev);
 	ast_i2c_init_bus(i2c_bus);
 	return 0;
 }

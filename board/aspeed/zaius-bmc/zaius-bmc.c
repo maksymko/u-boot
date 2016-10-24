@@ -121,11 +121,14 @@ static void read_macs_from_fru(void)
 	RETURN_IF_ERROR(fru_checksum(&fru_iua, sizeof(fru_iua)));
 	uint8_t temp_mac_addr[6];
 	int i = 0;
+	debug("Number of Addrs: %d\n", fru_iua.num_mac_addrs);
 	for (; i < fru_iua.num_mac_addrs; ++i) {
 		/* env always takes priority */
 		if (!eth_getenv_enetaddr_by_index("eth", i, temp_mac_addr)) {
 			eth_setenv_enetaddr_by_index("eth", i,
 						     fru_iua.mac_addr);
+		} else {
+			debug("eth%daddr already in env", i);
 		}
 		fru_iua.mac_addr[5] += 1;
 	}
