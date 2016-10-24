@@ -43,7 +43,6 @@
 #include <asm/io.h>
 
 /* TODO: Move this to GPIO specific file */
-#define AST_GPIO_BASE			(0x1e780000)
 #define GPIO_DVR			(0x0)
 #define GPIO_DDR			(0x4)
 #define GPIO_D3			(1 << 27)
@@ -150,10 +149,8 @@ int dram_init(void)
 	return 0;
 }
 
-static void reset_phy(void)
+void reset_phy(void)
 {
-	// DDR.
-	debug("Resetting PHY\n");
 	setbits_le32(AST_GPIO_BASE + GPIO_DDR, GPIO_D3);
 	clrbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
 	mdelay(2);
@@ -163,7 +160,6 @@ static void reset_phy(void)
 int board_eth_init(bd_t *bd)
 {
 	debug("Board ETH init\n");
-	reset_phy();
 #if defined(CONFIG_EEPROM_I2C_ADDR) && defined(CONFIG_EEPROM_I2C_BUS_NUM)
 	read_macs_from_fru();
 #else
