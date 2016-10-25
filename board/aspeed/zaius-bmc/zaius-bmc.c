@@ -104,6 +104,8 @@ static void read_macs_from_fru(void)
 {
 	debug("Setting MACs from FRU\n");
 	struct udevice *eeprom;
+	RETURN_IF_ERROR(i2c_set_chip_offset_len
+			(eeprom, CONFIG_EEPROM_OFFSET_LEN));
 	RETURN_IF_ERROR(i2c_get_chip_for_busnum
 			(CONFIG_EEPROM_I2C_BUS_NUM, CONFIG_EEPROM_I2C_ADDR, 1,
 			 &eeprom));

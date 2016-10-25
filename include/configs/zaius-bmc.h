@@ -31,6 +31,7 @@
 #define CONFIG_PHY_MAX_ADDR	32	/* this comes from <linux/phy.h> */
 
 /* FRU EEPROM */
+#define CONFIG_EEPROM_OFFSET_LEN			(2)
 #define CONFIG_EEPROM_I2C_BUS_NUM			(1)
 #define CONFIG_EEPROM_I2C_ADDR			(0x50)
 
