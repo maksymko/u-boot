@@ -70,8 +70,6 @@ static void ast_i2c_init_bus(struct ast_i2c *i2c_bus)
 	       | AST_I2CD_INTR_ABNORMAL, &i2c_bus->regs->icr);
 }
 
-static int ast_i2c_deblock(struct udevice *dev);
-
 static int ast_i2c_probe(struct udevice *dev)
 {
 	struct ast_i2c *i2c_bus = dev_get_priv(dev);
@@ -84,7 +82,6 @@ static int ast_i2c_probe(struct udevice *dev)
 	    (struct ast_i2c_regs *)dev_get_addr(dev);
 	i2c_bus->regs = i2c_base;
 
-	ast_i2c_deblock(dev);
 	ast_i2c_init_bus(i2c_bus);
 	return 0;
 }
@@ -142,7 +139,7 @@ static inline int ast_i2c_start_txn(struct ast_i2c_regs *i2c_base, u8 devaddr)
 }
 
 static int ast_i2c_read_data(struct ast_i2c *i2c_bus, u8 chip_addr, u8 *buffer,
-			     size_t len)
+			     size_t len, bool send_stop)
 {
 	struct ast_i2c_regs *i2c_base = i2c_bus->regs;
 
@@ -164,11 +161,16 @@ static int ast_i2c_read_data(struct ast_i2c *i2c_bus, u8 chip_addr, u8 *buffer,
 		*buffer = AST_I2CD_RX_DATA_BUF_GET(readl(&i2c_base->trbbr));
 	}
 	ast_i2c_clear_interrupts(i2c_base);
-	return ast_i2c_send_stop(i2c_base);
+
+	if (send_stop) {
+		return ast_i2c_send_stop(i2c_base);
+	}
+
+	return 0;
 }
 
 static int ast_i2c_write_data(struct ast_i2c *i2c_bus, u8 chip_addr, u8
-			      *buffer, size_t len)
+			      *buffer, size_t len, bool send_stop)
 {
 	struct ast_i2c_regs *i2c_base = i2c_bus->regs;
 
@@ -185,7 +187,12 @@ static int ast_i2c_write_data(struct ast_i2c *i2c_bus, u8 chip_addr, u8
 			return i2c_error;
 		}
 	}
-	return ast_i2c_send_stop(i2c_base);
+
+	if (send_stop) {
+		return ast_i2c_send_stop(i2c_base);
+	}
+
+	return 0;
 }
 
 static int ast_i2c_deblock(struct udevice *dev)
@@ -194,7 +201,6 @@ static int ast_i2c_deblock(struct udevice *dev)
 	struct ast_i2c_regs *i2c_base = i2c_bus->regs;
 
 	u32 csr = readl(&i2c_base->csr);
-	debug("Bus hung (%x), attempting recovery\n", csr);
 
 	int deblock_error = 0;
 	bool sda_high = csr & AST_I2CD_SDA_LINE_STS;
@@ -204,9 +210,11 @@ static int ast_i2c_deblock(struct udevice *dev)
 		return 0;
 	} else if (sda_high) {
 		/* Send stop command */
+		debug("Unterminated TXN in (%x), sending stop\n", csr);
 		deblock_error = ast_i2c_send_stop(i2c_base);
 	} else if (scl_high) {
 		/* Possibly stuck slave */
+		debug("Bus stuck (%x), attempting recovery\n", csr);
 		writel(AST_I2CD_BUS_RECOVER_CMD, &i2c_base->csr);
 		deblock_error = ast_i2c_wait_isr(i2c_base,
 						 AST_I2CD_INTR_BUS_RECOVER_DONE);
@@ -223,6 +231,7 @@ static int ast_i2c_xfer(struct udevice *dev, struct i2c_msg *msg, int nmsgs)
 	struct ast_i2c *i2c_bus = dev_get_priv(dev);
 	int ret;
 
+	(void)ast_i2c_deblock(dev);
 	debug("i2c_xfer: %d messages\n", nmsgs);
 	for (; nmsgs > 0; nmsgs--, msg++) {
 		if (msg->flags & I2C_M_RD) {
@@ -230,13 +239,13 @@ static int ast_i2c_xfer(struct udevice *dev, struct i2c_msg *msg, int nmsgs)
 			      msg->addr, msg->len, msg->flags);
 			ret =
 			    ast_i2c_read_data(i2c_bus, msg->addr, msg->buf,
-						msg->len);
+						msg->len, (nmsgs == 1));
 		} else {
 			debug("i2c_write: chip=0x%x, len=0x%x, flags=0x%x\n",
 			      msg->addr, msg->len, msg->flags);
 			ret =
 			    ast_i2c_write_data(i2c_bus, msg->addr, msg->buf,
-						 msg->len);
+						 msg->len, (nmsgs == 1));
 		}
 		if (ret) {
 			debug("%s: error (%d)\n", __func__, ret);
