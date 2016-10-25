@@ -510,16 +510,17 @@ void ast_scu_get_who_init_dram(void)
 
 void ast_scu_enable_i2c(u8 bus_num)
 {
-	if (bus_num < SCU_I2C_MIN_BUS_NUM || bus_num > SCU_I2C_MAX_BUS_NUM) {
+	if (bus_num > SCU_I2C_MAX_BUS_NUM) {
 		debug("%s: bus_num is out of range, must be [%d - %d]\n", __func__,
 			  SCU_I2C_MIN_BUS_NUM, SCU_I2C_MAX_BUS_NUM);
 		return;
 	}
 
-	/* Enable I2C Controllers */
-	clrbits_le32(AST_SCU_BASE + AST_SCU_RESET, SCU_RESET_I2C);
 
-	if (bus_num >= 3) {
+	if (bus_num == 0) {
+		/* Enable I2C Controllers */
+		clrbits_le32(AST_SCU_BASE + AST_SCU_RESET, SCU_RESET_I2C);
+	} else if (bus_num >= 3) {
 		setbits_le32(AST_SCU_BASE + AST_SCU_FUN_PIN_CTRL5,
 					 SCU_FUN_PIN_I2C(bus_num));
 #ifdef AST_SOC_G5
