@@ -17,14 +17,9 @@
 } while (0)
 
 #define ECHECKSUM	(2001)
+#define MACADDR_SIZE	(6)
 
-int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
-{
-	printf("Not implemented. EEPROM is read-only.\n");
-	return 0;
-}
-
-struct zaius_fru_common_header {
+static struct __attribute__((packed)) {
 	uint8_t version;
 	uint8_t iua_offset;
 	uint8_t cia_offset;
@@ -33,17 +28,19 @@ struct zaius_fru_common_header {
 	uint8_t mra_offset;
 	uint8_t padding;
 	uint8_t checksum;
-} __attribute__((packed));
+} fru_header;
 
-struct zaius_fru_iua {
+static struct __attribute__((packed)) {
 	uint8_t version;
 	uint8_t type;
 	uint8_t length;
-	uint8_t mac_addr[6];
+	uint8_t mac_addr[MACADDR_SIZE];
 	uint8_t num_mac_addrs;
 	uint8_t padding[21];
 	uint8_t checksum;
-} __attribute__((packed));
+} fru_iua;
+
+static bool is_eeprom_read = false;
 
 static int fru_checksum(void *data, size_t len)
 {
@@ -58,9 +55,11 @@ static int fru_checksum(void *data, size_t len)
 	return result == 0 ? 0 : -ECHECKSUM;
 }
 
-int mac_read_from_eeprom(void)
+static int read_eeprom(void)
 {
-	debug("Setting MACs from FRU\n");
+	if (is_eeprom_read)
+		return 0;
+
 	struct udevice *eeprom;
 
 	RETURN_IF_ERROR(i2c_get_chip_for_busnum
@@ -69,29 +68,65 @@ int mac_read_from_eeprom(void)
 	RETURN_IF_ERROR(i2c_set_chip_offset_len
 			(eeprom, CONFIG_EEPROM_OFFSET_LEN));
 
-	struct zaius_fru_common_header fru_header;
 	RETURN_IF_ERROR(dm_i2c_read
 			(eeprom, 0, (uint8_t *) & fru_header,
 			 sizeof(fru_header)));
 	RETURN_IF_ERROR(fru_checksum(&fru_header, sizeof(fru_header)));
 
-	struct zaius_fru_iua fru_iua;
 	RETURN_IF_ERROR(dm_i2c_read
 			(eeprom, fru_header.iua_offset * 8,
 			 (uint8_t *) & fru_iua, sizeof(fru_iua)));
 	RETURN_IF_ERROR(fru_checksum(&fru_iua, sizeof(fru_iua)));
-	uint8_t temp_mac_addr[6];
+
+	is_eeprom_read = true;
+	return 0;
+}
+
+int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	int ret = read_eeprom();
+	if (ret < 0) {
+		printf("Can't read EEPROM: %d\n", ret);
+		return ret;
+	}
+
+	printf("Number of MAC Addrs in EEPROM: %d\n", fru_iua.num_mac_addrs);
+	uint8_t fru_mac_addr[MACADDR_SIZE];
+	memcpy(fru_mac_addr, fru_iua.mac_addr, MACADDR_SIZE);
+	int i = 0;
+	for (; i < fru_iua.num_mac_addrs; ++i) {
+		printf("#%d: %02x:%02x:%02x:%02x:%02x:%02x\n", i + 1,
+			   fru_mac_addr[0],
+			   fru_mac_addr[1],
+			   fru_mac_addr[2],
+			   fru_mac_addr[3],
+			   fru_mac_addr[4],
+			   fru_mac_addr[5]);
+		fru_mac_addr[5] += 1;
+	}
+	return 0;
+}
+
+int mac_read_from_eeprom(void)
+{
+	debug("Setting MACs from FRU\n");
+	RETURN_IF_ERROR(read_eeprom());
+
+	uint8_t temp_mac_addr[MACADDR_SIZE];
+	uint8_t fru_mac_addr[MACADDR_SIZE];
+	memcpy(fru_mac_addr, fru_iua.mac_addr, MACADDR_SIZE);
+
 	int i = 0;
 	debug("Number of Addrs: %d\n", fru_iua.num_mac_addrs);
 	for (; i < fru_iua.num_mac_addrs; ++i) {
 		/* env always takes priority */
 		if (!eth_getenv_enetaddr_by_index("eth", i, temp_mac_addr)) {
 			eth_setenv_enetaddr_by_index("eth", i,
-						     fru_iua.mac_addr);
+						     fru_mac_addr);
 		} else {
-			debug("eth%daddr already in env", i);
+			debug("eth%daddr already in env\n", i);
 		}
-		fru_iua.mac_addr[5] += 1;
+		fru_mac_addr[5] += 1;
 	}
 
 	return 0;

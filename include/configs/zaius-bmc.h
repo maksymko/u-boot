@@ -34,6 +34,7 @@
 #define CONFIG_EEPROM_OFFSET_LEN			(2)
 #define CONFIG_EEPROM_I2C_BUS_NUM			(1)
 #define CONFIG_EEPROM_I2C_ADDR			(0x50)
+#define CONFIG_ID_EEPROM
 
 /* platform.S settings */
 #define	CONFIG_DRAM_ECC_SIZE		0x10000000

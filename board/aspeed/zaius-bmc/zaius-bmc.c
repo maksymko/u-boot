@@ -49,7 +49,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-
 #if defined(CONFIG_SHOW_BOOT_PROGRESS)
 void show_boot_progress(int progress)
 {
