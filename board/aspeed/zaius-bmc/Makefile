@@ -21,4 +21,4 @@
 # MA 02111-1307 USA
 #
 
-obj-y   = zaius-bmc.o
+obj-y   = zaius-bmc.o fru_eeprom.o
