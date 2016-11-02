@@ -115,7 +115,14 @@ int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 int mac_read_from_eeprom(void)
 {
 	debug("Setting MACs from FRU\n");
-	RETURN_IF_ERROR(read_eeprom());
+	/* The failure to read eeprom is not fatal to boot,
+	 * so just returning zero anyway.
+	 */
+	int err = read_eeprom();
+	if (err < 0) {
+		debug("Failed to read FRU EEPROM\n");
+		return 0;
+	}
 
 	uint8_t temp_mac_addr[MACADDR_SIZE];
 	uint8_t fru_mac_addr[MACADDR_SIZE];
