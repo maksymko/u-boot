@@ -154,4 +154,4 @@ struct ast_i2c_regs {
 			 AST_I2CD_M_TX_CMD | \
 			 AST_I2CD_M_START_CMD)
 
-#endif				/* _ASPEED_REGS_I2C_H_ */
+#endif				/* __AST_I2C_H_ */
