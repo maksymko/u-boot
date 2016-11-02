@@ -82,6 +82,11 @@ static int read_eeprom(void)
 	return 0;
 }
 
+/* CONFIG_ID_EEPROM setting, that enables mac_read_from_eeprom call
+ * in board_r also enables this function/command.
+ * We don't need any functionality of this command, definitely don't need
+ * eeprom writing functionality, so I just made it print info about MACs.
+ */
 int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int ret = read_eeprom();
