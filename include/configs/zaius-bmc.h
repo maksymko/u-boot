@@ -37,6 +37,7 @@
 #define CONFIG_ID_EEPROM
 
 /* platform.S settings */
-#define	CONFIG_DRAM_ECC_SIZE		0x10000000
+#define CONFIG_DRAM_ECC
+#define	CONFIG_DRAM_ECC_SIZE		0x20000000
 
 #endif	/* __AST_G5_NCSI_CONFIG_H */
