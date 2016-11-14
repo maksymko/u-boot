@@ -45,4 +45,6 @@
 
 #define CONFIG_SYS_TIMER_RATE     CONFIG_SYS_HZ
 
+#define CONFIG_AST_WDT_FOR_RESET	(0)
+
 #endif	/* __CONFIG_H */
