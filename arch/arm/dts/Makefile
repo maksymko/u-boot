@@ -297,7 +297,7 @@ dtb-$(CONFIG_TARGET_SAMA5D2_XPLAINED) += \
 	at91-sama5d2_xplained.dtb
 
 dtb-$(CONFIG_ARCH_ASPEED) += \
-  ast2500-evb.dts
+  ast2500-evb.dtb
 
 targets += $(dtb-y)
 
