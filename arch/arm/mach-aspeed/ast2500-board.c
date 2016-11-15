@@ -1,6 +1,8 @@
 #include <common.h>
 #include <asm/io.h>
 
+#include <debug_uart.h>
+
 #define AST_TIMER_BASE			(0x1e782000)
 #define AST_WDT_BASE			(0x1e785000)
 
@@ -20,6 +22,9 @@ int board_early_init_f(void)
 	writel(0, AST_WDT_BASE + 0x2c);
 #endif
 	writel(0, AST_WDT_BASE + 0x4c);
+	debug_uart_init();
+	printch('E');
+	printascii("<Early Init>\r\n");
 	return 0;
 }
 
