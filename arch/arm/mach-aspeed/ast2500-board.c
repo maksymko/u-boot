@@ -15,10 +15,6 @@ void lowlevel_init(void)
 
 int board_early_init_f(void)
 {
-	writel(0xae, AST_TIMER_BASE + 0x38);
-	writel(0xf000, AST_TIMER_BASE + 0x3c);
-	writel(~0, AST_TIMER_BASE + 0x44);
-	writel((3 << 12), AST_TIMER_BASE + 0x30);
 #ifndef CONFIG_FIRMWARE_2ND_BOOT
 	struct ast_wdt *sec_boot_wdt = ast_get_wdt(AST_2ND_BOOT_WDT);
 	if (IS_ERR(sec_boot_wdt))
