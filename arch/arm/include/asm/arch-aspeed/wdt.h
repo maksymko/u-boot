@@ -3,6 +3,15 @@
 
 #define WDT_BASE			(0x1e785000)
 
+/* Second Watchdog Timer by default is configured
+ * to trigger secondary boot source.
+ */
+#define AST_2ND_BOOT_WDT		(1)
+/* Third Watchdog Timer by default is configured
+ * to toggle Flash address mode switch before reset.
+ */
+#define AST_FLASH_ADDR_DETECT_WDT	(2)
+
 /* Special value that needs to be written to counter_restart register to
  * (re)start the timer.
  */

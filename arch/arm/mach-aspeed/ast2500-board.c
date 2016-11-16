@@ -1,10 +1,11 @@
 #include <common.h>
 #include <asm/io.h>
+#include <asm/arch/wdt.h>
+#include <linux/err.h>
 
 #include <debug_uart.h>
 
 #define AST_TIMER_BASE			(0x1e782000)
-#define AST_WDT_BASE			(0x1e785000)
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -19,9 +20,15 @@ int board_early_init_f(void)
 	writel(~0, AST_TIMER_BASE + 0x44);
 	writel((3 << 12), AST_TIMER_BASE + 0x30);
 #ifndef CONFIG_FIRMWARE_2ND_BOOT
-	writel(0, AST_WDT_BASE + 0x2c);
+	struct ast_wdt *sec_boot_wdt = ast_get_wdt(AST_2ND_BOOT_WDT);
+	if (IS_ERR(sec_boot_wdt))
+		return PTR_ERR(sec_boot_wdt);
+	wdt_stop(sec_boot_wdt);
 #endif
-	writel(0, AST_WDT_BASE + 0x4c);
+	struct ast_wdt *flash_addr_wdt = ast_get_wdt(AST_FLASH_ADDR_DETECT_WDT);
+	if (IS_ERR(flash_addr_wdt))
+		return PTR_ERR(flash_addr_wdt);
+	wdt_stop(flash_addr_wdt);
 	debug_uart_init();
 	printch('E');
 	printascii("<Early Init>\r\n");
