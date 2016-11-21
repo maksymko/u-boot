@@ -1,19 +1,17 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/arch/wdt.h>
+#include <asm/arch/timer.h>
+#include <dm.h>
+#include <dm/uclass.h>
 #include <linux/err.h>
+#include <timer.h>
 
 #include <debug_uart.h>
 
-#define AST_TIMER_BASE			(0x1e782000)
-
 DECLARE_GLOBAL_DATA_PTR;
 
-void lowlevel_init(void)
-{
-}
-
-int board_early_init_f(void)
+static int stop_wdts(void)
 {
 #ifndef CONFIG_FIRMWARE_2ND_BOOT
 	struct ast_wdt *sec_boot_wdt = ast_get_wdt(AST_2ND_BOOT_WDT);
@@ -25,9 +23,22 @@ int board_early_init_f(void)
 	if (IS_ERR(flash_addr_wdt))
 		return PTR_ERR(flash_addr_wdt);
 	wdt_stop(flash_addr_wdt);
+  return 0;
+}
+
+void lowlevel_init(void)
+{
+}
+
+int mach_cpu_init(void)
+{
 	debug_uart_init();
-	printch('E');
-	printascii("<Early Init>\r\n");
+  return stop_wdts();
+}
+
+int board_early_init_f(void)
+{
+	printascii("\r\n<Early Init>\r\n");
 	return 0;
 }
 
@@ -39,7 +50,9 @@ int board_init(void)
 
 int dram_init(void)
 {
-	// Huge TODO
-	return 0;
+	printascii("<DRAMI0>\r\n");
+  mdelay(120);
+	printascii("<DRAMI1>\r\n");
+	return 1;
 }
 

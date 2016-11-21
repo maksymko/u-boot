@@ -40,6 +40,7 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
+		u-boot,dm-pre-reloc;
 
 		fmc: flash-controller@1e620000 {
 			reg = < 0x1e620000 0xc4
@@ -135,6 +136,7 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges;
+			u-boot,dm-pre-reloc;
 
 			clk_clkin: clk_clkin@1e6e2070 {
 				#clock-cells = <0>;
@@ -999,13 +1001,9 @@
 			};
 
 			timer: timer@1e782000 {
-				compatible = "aspeed,ast2400-timer";
+				compatible = "aspeed,ast2500-timer";
+				u-boot,dm-pre-reloc;
 				reg = <0x1e782000 0x90>;
-				// The moxart_timer driver registers only one
-				// interrupt and assumes it's for timer 1
-				//interrupts = <16 17 18 35 36 37 38 39>;
-				interrupts = <16>;
-				clocks = <&clk_apb>;
 			};
 
 			ibt: ibt@1e789140 {
