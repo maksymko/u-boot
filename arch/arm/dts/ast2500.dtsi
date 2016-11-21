@@ -2,6 +2,8 @@
  * https://github.com/openbmc/linux/blob/c5682cb/arch/arm/boot/dts/aspeed-g5.dtsi
  */
 
+#include <dt-bindings/clock/ast2500-scu.h>
+
 #include "skeleton.dtsi"
 
 / {
@@ -20,6 +22,17 @@
 			device_type = "cpu";
 			reg = <0>;
 		};
+	};
+
+	scu: clock-controller@1e6e2000 {
+		compatible = "aspeed,ast2500-scu";
+		reg = <0x1e6e2000 0x1000>;
+		u-boot,dm-pre-reloc;
+		#clock-cells = <1>;
+		#reset-cells = <1>;
+		assigned-clocks = <&scu PLL_MPLL>;
+		assigned-clock-rates = <400000000>;
+		assigned-clock-parents = <&scu PLL_MPLL>;
 	};
 
 	ahb {
