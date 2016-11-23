@@ -43,9 +43,9 @@ struct ast2500_clk_priv {
 
 static inline ulong ast2500_get_hm_pll_rate(u32 clkin, u32 pll_param)
 {
-	u32 multiplier = _HM_NUM(pll_param) / _HM_DENUM(pll_param);
+	u32 multiplier = (_HM_NUM(pll_param) + 1) / (_HM_DENUM(pll_param) + 1);
 	ulong prediv = clkin * multiplier;
-	return prediv / _HM_POSTDIV(pll_param);
+	return prediv / (_HM_POSTDIV(pll_param) + 1);
 }
 
 static inline u32 ast2500_get_clkin(struct ast2500_scu *scu)
@@ -127,6 +127,7 @@ static ulong ast2500_clk_set_rate(struct clk *clk, ulong rate)
 
 	ulong new_rate;
 	switch (clk->id) {
+	case PLL_MPLL:
 	case MCLK_DDR:
 		new_rate = ast2500_configure_ddr(priv->scu, rate);
 		break;
