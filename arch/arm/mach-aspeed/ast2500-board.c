@@ -1,10 +1,11 @@
 #include <common.h>
-#include <asm/io.h>
-#include <asm/arch/wdt.h>
 #include <asm/arch/timer.h>
+#include <asm/arch/wdt.h>
+#include <asm/io.h>
 #include <dm.h>
 #include <dm/uclass.h>
 #include <linux/err.h>
+#include <ram.h>
 #include <timer.h>
 
 #include <debug_uart.h>
@@ -51,8 +52,23 @@ int board_init(void)
 int dram_init(void)
 {
 	printascii("<DRAMI0>\r\n");
-  mdelay(120);
-	printascii("<DRAMI1>\r\n");
+
+  struct udevice *dev;
+  int ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+  if (ret) {
+    printascii("DRAM FAIL1\r\n");
+    return ret;
+  }
+
+  struct ram_info ram;
+  ret = ram_get_info(dev, &ram);
+  if (ret) {
+    printascii("DRAM FAIL2\r\n");
+  }
+
+  printascii("Size: ");
+  printhex4(ram.size);
+  printascii("\r\n");
 	return 1;
 }
 
