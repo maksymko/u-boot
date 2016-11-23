@@ -17,10 +17,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-struct ast2500_clk_priv {
-	struct ast2500_scu *scu;
-};
-
 /* For H-PLL and M-PLL the formula is
  * (Output Frequency) = CLKIN * ((M + 1) / (N + 1)) / (P + 1)
  * M - Numerator

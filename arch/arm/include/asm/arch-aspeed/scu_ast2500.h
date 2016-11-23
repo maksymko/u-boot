@@ -6,6 +6,10 @@
 
 #ifndef __ASSEMBLY__
 
+struct ast2500_clk_priv {
+	struct ast2500_scu *scu;
+};
+
 struct ast2500_scu {
 	u32 protection_key;
 	u32 sysreset_ctrl1;
@@ -73,6 +77,9 @@ struct ast2500_scu {
 	u32 reserved9[13];
 	u32 clk_duty_sel;
 };
+
+int ast_get_clk(struct udevice **devp);
+void *ast_get_scu(void);
 
 #endif  /* __ASSEMBLY__ */
 
