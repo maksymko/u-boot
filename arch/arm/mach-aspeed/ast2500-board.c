@@ -53,22 +53,25 @@ int dram_init(void)
 {
 	printascii("<DRAMI0>\r\n");
 
-  struct udevice *dev;
-  int ret = uclass_get_device(UCLASS_RAM, 0, &dev);
-  if (ret) {
-    printascii("DRAM FAIL1\r\n");
-    return ret;
-  }
+	struct udevice *dev;
+	int ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+	if (ret) {
+		printascii("DRAM FAIL1\r\n");
+		return ret;
+	}
 
-  struct ram_info ram;
-  ret = ram_get_info(dev, &ram);
-  if (ret) {
-    printascii("DRAM FAIL2\r\n");
-  }
+	struct ram_info ram;
+	ret = ram_get_info(dev, &ram);
+	if (ret) {
+		printascii("DRAM FAIL2\r\n");
+		return ret;
+	}
 
-  printascii("Size: ");
-  printhex4(ram.size);
-  printascii("\r\n");
-	return 1;
+
+	printascii("Size: 0x");
+	printhex8(ram.size);
+	gd->ram_size = 120 * 1024 * 1024;
+	printascii("\r\n");
+	return 0;
 }
 

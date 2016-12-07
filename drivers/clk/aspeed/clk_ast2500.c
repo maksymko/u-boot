@@ -109,7 +109,14 @@ static ulong ast2500_configure_ddr(struct ast2500_scu *scu, ulong rate)
 	const u32 div_mask = (_HM_NUM_MASK << _HM_NUM_SHIFT) | (_HM_DENUM_MASK << _HM_DENUM_SHIFT) | (_HM_POSTDIV_MASK << _HM_POSTDIV_SHIFT);
 	mpll_reg &= ~div_mask;
 	mpll_reg |= ((_HM_NUM_MASK & num) << _HM_NUM_SHIFT) | ((_HM_DENUM_MASK & denum) << _HM_DENUM_SHIFT) | ((_HM_POSTDIV_MASK & post_div) << _HM_POSTDIV_SHIFT);
-	writel(mpll_reg, &scu->m_pll_param);
+
+	printascii("MPLL Set To: ");
+	printhex8(mpll_reg);
+	printascii("\r\n");
+
+	/* FIXME */
+	/* writel(mpll_reg, &scu->m_pll_param); */
+	writel(0x93002400, &scu->m_pll_param);
 
 	mdelay(3);
 
@@ -118,7 +125,9 @@ static ulong ast2500_configure_ddr(struct ast2500_scu *scu, ulong rate)
 
 static ulong ast2500_clk_set_rate(struct clk *clk, ulong rate)
 {
-	printascii("Set CLK Rate\r\n");
+	printascii("Set CLK Rate");
+	printhex4(clk->id);
+	printascii("\r\n");
 	struct ast2500_clk_priv *priv = dev_get_priv(clk->dev);
 
 	ulong new_rate;
