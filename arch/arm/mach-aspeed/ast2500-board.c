@@ -14,17 +14,20 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static int stop_wdts(void)
 {
-#ifndef CONFIG_FIRMWARE_2ND_BOOT
-	struct ast_wdt *sec_boot_wdt = ast_get_wdt(AST_2ND_BOOT_WDT);
-	if (IS_ERR(sec_boot_wdt))
-		return PTR_ERR(sec_boot_wdt);
-	wdt_stop(sec_boot_wdt);
-#endif
 	struct ast_wdt *flash_addr_wdt = ast_get_wdt(AST_FLASH_ADDR_DETECT_WDT);
 	if (IS_ERR(flash_addr_wdt))
 		return PTR_ERR(flash_addr_wdt);
 	wdt_stop(flash_addr_wdt);
-  return 0;
+
+#ifndef CONFIG_FIRMWARE_2ND_BOOT
+	struct ast_wdt *sec_boot_wdt = ast_get_wdt(AST_2ND_BOOT_WDT);
+
+	if (IS_ERR(sec_boot_wdt))
+		return PTR_ERR(sec_boot_wdt);
+	wdt_stop(sec_boot_wdt);
+#endif
+
+	return 0;
 }
 
 void lowlevel_init(void)
@@ -34,7 +37,7 @@ void lowlevel_init(void)
 int mach_cpu_init(void)
 {
 	debug_uart_init();
-  return stop_wdts();
+	return stop_wdts();
 }
 
 int board_early_init_f(void)
