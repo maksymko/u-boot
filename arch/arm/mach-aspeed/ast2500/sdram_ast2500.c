@@ -198,9 +198,6 @@ static int ast2500_sdrammc_ddr4_calibrate_vref(struct dram_info *info)
 	int vref_max = 0;
 	int range_size = 0;
 
-	struct ast2500_sdrammc_regs *regs = info->regs;
-	struct ast2500_ddr_phy *phy = info->phy;
-
 	printch('T');
 	for (i = 1; i < 0x40; ++i) {
 		ast2500_sdrammc_set_vref(info, i);
@@ -380,7 +377,7 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 	setbits_le32(&regs->intr_ctrl, SDRAM_ICR_RESET_ALL);
 
 	ast2500_sdrammc_init_phy(priv->phy);
-	if (readl(&priv->scu->hwstrap) & AST_SCU_HWSTRAP_DDR4) {
+	if (readl(&priv->scu->hwstrap) & SCU_HWSTRAP_DDR4) {
 		ast2500_sdrammc_init_ddr4(priv);
 	} else {
 		printascii("Unsupported DRAM3\r\n");

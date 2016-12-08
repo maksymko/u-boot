@@ -1,8 +1,24 @@
 #ifndef _ASM_ARCH_SCU_AST2500_H
 #define _ASM_ARCH_SCU_AST2500_H
 
-#define AST_SCU_HWSTRAP_DDR4			(1 << 24)
-#define AST_SCU_HWSTRAP_CLKIN_25MHZ		(1 << 23)
+#define SCU_UNLOCK_VALUE		0x1688a8a8
+
+#define SCU_HWSTRAP_DDR4			(1 << 24)
+#define SCU_HWSTRAP_CLKIN_25MHZ		(1 << 23)
+
+#define SCU_MPLL_DENUM_SHIFT	0
+#define SCU_MPLL_DENUM_MASK		0x1f
+#define SCU_MPLL_NUM_SHIFT		5
+#define SCU_MPLL_NUM_MASK		0xff
+#define SCU_MPLL_POST_SHIFT		13
+#define SCU_MPLL_POST_MASK		0x3f
+
+#define SCU_HPLL_DENUM_SHIFT	0
+#define SCU_HPLL_DENUM_MASK		0x1f
+#define SCU_HPLL_NUM_SHIFT		5
+#define SCU_HPLL_NUM_MASK		0xff
+#define SCU_HPLL_POST_SHIFT		13
+#define SCU_HPLL_POST_MASK		0x3f
 
 #ifndef __ASSEMBLY__
 

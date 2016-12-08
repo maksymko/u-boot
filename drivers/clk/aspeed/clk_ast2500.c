@@ -17,58 +17,62 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-/* For H-PLL and M-PLL the formula is
+/*
+ * For H-PLL and M-PLL the formula is
  * (Output Frequency) = CLKIN * ((M + 1) / (N + 1)) / (P + 1)
  * M - Numerator
  * N - Denumerator
  * P - Post Divider
  * They have the same layout in their control register.
  */
-#define _HM_NUM_SHIFT			(5)
-#define _HM_NUM_MASK			(0xff)
-#define _HM_DENUM_SHIFT			(0)
-#define _HM_DENUM_MASK			(0x1f)
-#define _HM_POSTDIV_SHIFT		(0x13)
-#define _HM_POSTDIV_MASK		(0x3f)
 
-#define _get_masked(var, mask, shift)	(((var) >> shift) & mask)
-
-#define _HM_NUM(reg)	_get_masked(reg, _HM_NUM_MASK, _HM_NUM_SHIFT)
-#define _HM_DENUM(reg)	_get_masked(reg, _HM_DENUM_MASK, _HM_DENUM_SHIFT)
-#define _HM_POSTDIV(reg) _get_masked(reg, _HM_POSTDIV_MASK, _HM_POSTDIV_SHIFT)
-
-static inline ulong ast2500_get_hm_pll_rate(u32 clkin, u32 pll_param)
+/*
+ * Get the rate of the M-PLL clock from input clock frequency and
+ * the value of the M-PLL Parameter Register.
+ */
+static ulong ast2500_get_mpll_rate(ulong clkin, u32 mpll_reg)
 {
-	u32 multiplier = (_HM_NUM(pll_param) + 1) / (_HM_DENUM(pll_param) + 1);
-	ulong prediv = clkin * multiplier;
-	return prediv / (_HM_POSTDIV(pll_param) + 1);
+	const ulong num = (mpll_reg >> SCU_MPLL_NUM_SHIFT) & SCU_MPLL_NUM_MASK;
+	const ulong denum = (mpll_reg >> SCU_MPLL_DENUM_SHIFT) & SCU_MPLL_DENUM_MASK;
+	const ulong post_div = (mpll_reg >> SCU_MPLL_POST_SHIFT) & SCU_MPLL_POST_MASK;
+
+	return (clkin * ((num + 1) / (denum + 1))) / post_div;
 }
 
-static inline u32 ast2500_get_clkin(struct ast2500_scu *scu)
+/*
+ * Get the rate of the H-PLL clock from input clock frequency and
+ * the value of the H-PLL Parameter Register.
+ */
+static ulong ast2500_get_hpll_rate(ulong clkin, u32 mpll_reg)
 {
-	return readl(&scu->hwstrap) & AST_SCU_HWSTRAP_CLKIN_25MHZ
+	const ulong num = (mpll_reg >> SCU_HPLL_NUM_SHIFT) & SCU_HPLL_NUM_MASK;
+	const ulong denum = (mpll_reg >> SCU_HPLL_DENUM_SHIFT) & SCU_HPLL_DENUM_MASK;
+	const ulong post_div = (mpll_reg >> SCU_HPLL_POST_SHIFT) & SCU_HPLL_POST_MASK;
+
+	return (clkin * ((num + 1) / (denum + 1))) / post_div;
+}
+
+static ulong ast2500_get_clkin(struct ast2500_scu *scu)
+{
+	return readl(&scu->hwstrap) & SCU_HWSTRAP_CLKIN_25MHZ
 			? 25*1000*1000 : 24*1000*1000;
 }
 
 static ulong ast2500_clk_get_rate(struct clk *clk)
 {
 	struct ast2500_clk_priv *priv = dev_get_priv(clk->dev);
-
-	u32 clkin = ast2500_get_clkin(priv->scu);
+	ulong clkin = ast2500_get_clkin(priv->scu);
 	ulong rate;
+
 	switch (clk->id) {
 	case PLL_HPLL:
 	case ARMCLK:
 		/* This ignores dynamic/static slowdown of ARMCLK and may
 		 * be inacurate. */
-		rate =
-		    ast2500_get_hm_pll_rate(clkin,
-					    readl(&priv->scu->h_pll_param));
+		rate = ast2500_get_hpll_rate(clkin, readl(&priv->scu->h_pll_param));
 		break;
 	case MCLK_DDR:
-		rate =
-		    ast2500_get_hm_pll_rate(clkin,
-					    readl(&priv->scu->m_pll_param));
+		rate = ast2500_get_mpll_rate(clkin, readl(&priv->scu->m_pll_param));
 		break;
 	default:
 		return -ENOENT;
@@ -77,55 +81,85 @@ static ulong ast2500_clk_get_rate(struct clk *clk)
 	return rate;
 }
 
+static void ast2500_scu_unlock(struct ast2500_scu *scu)
+{
+	writel(SCU_UNLOCK_VALUE, &scu->protection_key);
+	while (! readl(&scu->protection_key));
+}
+
+static void ast2500_scu_lock(struct ast2500_scu *scu)
+{
+	writel(1, &scu->protection_key);
+	while (readl(&scu->protection_key));
+}
+
 static ulong ast2500_configure_ddr(struct ast2500_scu *scu, ulong rate)
 {
-	u32 clkin = ast2500_get_clkin(scu);
-
+	printascii("DDRCLK\r\n");
+	ulong clkin = ast2500_get_clkin(scu);
 	ulong new_rate = rate;
-	u16 num;
-	u16 denum = 1;
-	u16 post_div = 1;
+	u32 mpll_reg;
 
-	/* First, see if we can get away with just num. */
-	u32 rem = new_rate % clkin;
-	num = new_rate / clkin;
-	denum = 1;
-	post_div = 1;
-	if (rem > 0) {
-		u32 rev_err = clkin / rem;
-		if (rev_err * num < (_HM_NUM_MASK + 1) && (rev_err < (_HM_POSTDIV_MASK + 1))) {
-			/* Some of the error can be corrected. */
-			num *= rev_err;
-			post_div = rev_err;
+	/*
+	 * There are not that many combinations of numerator, denumerator and post divider,
+	 * so just brute force the best combination, however, to avoid overflow when
+	 * multiplying, use kHz.
+	 */
+	const ulong clkin_khz = clkin / 1000;
+	const ulong rate_khz = rate / 1000;
+
+	ulong best_num = 0;
+	ulong best_denum = 0;
+	ulong best_post = 0;
+	ulong delta = rate;
+
+	ulong num, denum, post;
+	for (denum = 0; denum <= SCU_MPLL_DENUM_MASK; ++denum) {
+		for (post = 0; post <= SCU_MPLL_POST_MASK; ++post) {
+			num = (rate_khz * (post + 1) / clkin_khz) * (denum + 1);
+			ulong new_rate_khz = (clkin_khz * ((num + 1) / (denum + 1))) / (post + 1);
+
+			/* Keep the rate below requested one. */
+			if (new_rate_khz > rate_khz)
+				continue;
+
+			if (new_rate_khz - rate_khz < delta) {
+				delta = new_rate_khz - rate_khz;
+
+				best_num = num;
+				best_denum = denum;
+				best_post = post;
+
+				if (delta == 0)
+					goto rate_calc_done;
+			}
 		}
 	}
 
-	/* To get values to set in the register, subtract 1 */
-	num -= 1;
-	denum -= 1;
-	post_div -= 1;
+rate_calc_done:
 
-	u32 mpll_reg = readl(&scu->m_pll_param);
-	const u32 div_mask = (_HM_NUM_MASK << _HM_NUM_SHIFT) | (_HM_DENUM_MASK << _HM_DENUM_SHIFT) | (_HM_POSTDIV_MASK << _HM_POSTDIV_SHIFT);
-	mpll_reg &= ~div_mask;
-	mpll_reg |= ((_HM_NUM_MASK & num) << _HM_NUM_SHIFT) | ((_HM_DENUM_MASK & denum) << _HM_DENUM_SHIFT) | ((_HM_POSTDIV_MASK & post_div) << _HM_POSTDIV_SHIFT);
+	mpll_reg = readl(&scu->m_pll_param);
+	mpll_reg &= ~((SCU_MPLL_POST_MASK << SCU_MPLL_POST_SHIFT)
+			| (SCU_MPLL_NUM_MASK << SCU_MPLL_NUM_SHIFT)
+			| (SCU_MPLL_DENUM_MASK << SCU_MPLL_DENUM_SHIFT));
+	mpll_reg |= (best_post << SCU_MPLL_POST_SHIFT)
+			| (best_num << SCU_MPLL_NUM_SHIFT)
+			| (best_denum << SCU_MPLL_DENUM_SHIFT);
 
 	printascii("MPLL Set To: ");
 	printhex8(mpll_reg);
 	printascii("\r\n");
 
-	/* FIXME */
-	/* writel(mpll_reg, &scu->m_pll_param); */
-	writel(0x93002400, &scu->m_pll_param);
+	ast2500_scu_unlock(scu);
+	writel(mpll_reg, &scu->m_pll_param);
+	ast2500_scu_lock(scu);
 
-	mdelay(3);
-
-	return ast2500_get_hm_pll_rate(clkin, mpll_reg);
+	return ast2500_get_mpll_rate(clkin, mpll_reg);
 }
 
 static ulong ast2500_clk_set_rate(struct clk *clk, ulong rate)
 {
-	printascii("Set CLK Rate");
+	printascii("Set CLK Rate ");
 	printhex4(clk->id);
 	printascii("\r\n");
 	struct ast2500_clk_priv *priv = dev_get_priv(clk->dev);
