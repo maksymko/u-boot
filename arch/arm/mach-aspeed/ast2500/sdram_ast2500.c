@@ -227,13 +227,15 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 {
 	/* The controller supports 128/256/512/1024 MB ram */
 
-	/* TODO: disable protection */
+	/* Disable oversized write protection */
+	setbits_le32(&info->regs->config, (SDRAM_CONF_CAP_MASK << SDRAM_CONF_CAP_SHIFT));
+
 	/* Initially set the size to minimum supported */
-	u32 ram_size = 128 * 1024 * 1024;
+	ulong ram_size = 128 * 1024 * 1024;
 	const int write_test_offset = 1024 * 1024;
 	const u32 test_pattern = 0xdeadbeef;
 
-	int cap_param = 0;
+	u32 cap_param = 0;
 	for (; ram_size < SDRAM_MAX_SIZE; ram_size <<= 1, ++cap_param) {
 		/* Check if the size can be extended */
 		u32 write_addr =
@@ -336,6 +338,18 @@ static int ast2500_sdrammc_init_ddr4(struct dram_info *info)
 	return ast2500_sdrammc_calc_size(info);
 }
 
+static void ast2500_sdrammc_lock(struct dram_info * info)
+{
+	writel(SDRAM_UNLOCK_KEY, &info->regs->protection_key);
+	while (!readl(&info->regs->protection_key));
+}
+
+static void ast2500_sdrammc_unlock(struct dram_info * info)
+{
+	writel(~SDRAM_UNLOCK_KEY, &info->regs->protection_key);
+	while (readl(&info->regs->protection_key));
+}
+
 static int ast2500_sdrammc_probe(struct udevice *dev)
 {
 	struct dram_info *priv = (struct dram_info *)dev_get_priv(dev);
@@ -348,10 +362,6 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 		return ret;
 	}
 
-	printascii("D: Clock ID: ");
-	printhex4(priv->ddr_clk.id);
-	printascii("\r\n");
-
 	priv->scu = ast_get_scu();
 	if (IS_ERR(priv->scu))
 		return PTR_ERR(priv->scu);
@@ -363,6 +373,7 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 
 	writel(SDRAM_UNLOCK_KEY, &regs->protection_key);
 	while (!readl(&regs->protection_key));
+
 	writel(SDRAM_PCR_MREQI_DIS | SDRAM_PCR_RESETN_DIS, &regs->power_control);
 	writel(SDRAM_VIDEO_UNLOCK_KEY, &regs->gm_protection_key);
 
@@ -373,7 +384,6 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 		writel(ddr_max_grant_params[i], &regs->max_grant_len[i]);
 	}
 
-	/* TODO: back to zero */
 	setbits_le32(&regs->intr_ctrl, SDRAM_ICR_RESET_ALL);
 
 	ast2500_sdrammc_init_phy(priv->phy);
@@ -384,18 +394,10 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 		return -EINVAL;
 	}
 
-	priv->info.base = 0x80000000;
+	clrbits_le32(&regs->intr_ctrl, SDRAM_ICR_RESET_ALL);
+	writel(~SDRAM_UNLOCK_KEY, &regs->protection_key);
+	while (readl(&regs->protection_key));
 
-	printascii("New Rate: ");
-	printhex8(new_rate);
-	printascii("\r\n");
-
-	printascii("MPLL_PARAM: ");
-	printhex8(readl(&priv->scu->m_pll_param));
-	printascii("\r\n");
-
-	(void)regs;
-	(void)priv;
 	return 0;
 }
 
