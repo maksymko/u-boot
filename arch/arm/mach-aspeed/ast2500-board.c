@@ -58,8 +58,6 @@ int board_init(void)
 
 int dram_init(void)
 {
-	printascii("<DRAMI0>\r\n");
-
 	struct udevice *dev;
 	int ret = uclass_get_device(UCLASS_RAM, 0, &dev);
 	if (ret) {
@@ -75,10 +73,7 @@ int dram_init(void)
 	}
 
 
-	printascii("Size: 0x");
-	printhex8(ram.size);
-	gd->ram_size = 120 * 1024 * 1024;
-	printascii("\r\n");
+	gd->ram_size = ram.size;
 	return 0;
 }
 
