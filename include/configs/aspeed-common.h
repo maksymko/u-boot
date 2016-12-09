@@ -3,19 +3,16 @@
  * Ryan Chen <ryan_chen@aspeedtech.com>
  *
  * Copyright 2016 IBM Corporation
+ * (C) Copyright 2016 Google, Inc
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
+ * SPDX-License-Identifier:     GPL-2.0+
  */
 
 #ifndef __AST_COMMON_CONFIG_H
 #define __AST_COMMON_CONFIG_H
 
 /* Misc CPU related */
-#define CONFIG_CMDLINE_TAG		/* enable passing of ATAGs */
+#define CONFIG_CMDLINE_TAG
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_INITRD_TAG
 
@@ -68,7 +65,7 @@
  * Miscellaneous configurable options
  */
 #define CONFIG_SYS_LONGHELP
-#define CONFIG_SYS_CBSIZE		256		/* Console I/O Buffer Size */
+#define CONFIG_SYS_CBSIZE		256
 
 /* Print Buffer Size */
 #define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
@@ -78,12 +75,12 @@
 #define CONFIG_BOOTARGS			"console=ttyS4,115200n8 root=/dev/ram rw"
 
 #define CONFIG_SYS_MAX_FLASH_BANKS 	1
-#define CONFIG_SYS_MAX_FLASH_SECT	8192		/* max number of sectors on one chip */
+#define CONFIG_SYS_MAX_FLASH_SECT	8192
 #define CONFIG_ENV_IS_IN_FLASH		1
-#define CONFIG_ENV_OFFSET		0x60000	/* environment starts here  */
+#define CONFIG_ENV_OFFSET		0x60000
 #define CONFIG_ENV_ADDR			(CONFIG_SYS_TEXT_BASE + CONFIG_ENV_OFFSET)
 
-#define CONFIG_ENV_SIZE			0x20000	/* Total Size of Environment Sector */
+#define CONFIG_ENV_SIZE			0x20000
 
 #define CONFIG_BOOTCOMMAND	"bootm 20080000 20300000"
 #define CONFIG_ENV_OVERWRITE
