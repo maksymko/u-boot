@@ -33,8 +33,6 @@
 /*
  * Memory Info
  */
-#define CONFIG_SYS_MALLOC_LEN   	(0x1000 + 4*1024*1024) /* malloc() len */
-
 #define CONFIG_SYS_LOAD_ADDR	0x83000000	/* default load address */
 
 #define CONFIG_BOARD_EARLY_INIT_F
@@ -42,7 +40,5 @@
 #define CONFIG_SYS_FLASH_CFI
 #define CONFIG_SYS_FLASH_BASE     (0x20000000)
 #define CONFIG_FLASH_CFI_DRIVER
-
-#define CONFIG_AST_WDT_FOR_RESET	(0)
 
 #endif	/* __CONFIG_H */

@@ -14,10 +14,6 @@
 #ifndef __AST_COMMON_CONFIG_H
 #define __AST_COMMON_CONFIG_H
 
-#define CONFIG_EXTRA_ENV_SETTINGS ASPEED_ENV_SETTINGS
-
-#define CONFIG_SKIP_LOWLEVEL_INIT	/* Disable board lowlevel_init */
-
 /* Misc CPU related */
 #define CONFIG_CMDLINE_TAG		/* enable passing of ATAGs */
 #define CONFIG_SETUP_MEMORY_TAGS
@@ -34,7 +30,7 @@
 #define PRE_CON_RAM_SZ		CONFIG_PRE_CON_BUF_SZ
 #endif
 
-#define CONFIG_SYS_SDRAM_BASE		(0x80000000)
+#define CONFIG_SYS_SDRAM_BASE		0x80000000
 #define CONFIG_SYS_INIT_RAM_ADDR	(0x1e720000 + PRE_CON_RAM_SZ)
 #define CONFIG_SYS_INIT_RAM_SIZE	(36*1024 - PRE_CON_RAM_SZ)
 #define SYS_INIT_RAM_END		(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_SIZE)
@@ -45,17 +41,15 @@
 
 #define CONFIG_SYS_TEXT_BASE		0x00000000
 
-#define CONFIG_SYS_MALLOC_LEN   	(0x1000 + 4*1024*1024) /* malloc() len */
-
-#define CONFIG_ASPEED_TIMER_CLK		(1*1000*1000)	/* use external clk (1M) */
+#define CONFIG_SYS_MALLOC_LEN   	(32 << 20)
 
 /*
  * NS16550 Configuration
  */
 #define CONFIG_SYS_NS16550_SERIAL
-#define CONFIG_SYS_NS16550_REG_SIZE		(-4)
+#define CONFIG_SYS_NS16550_REG_SIZE		-4
 #define CONFIG_SYS_NS16550_CLK			24000000
-#define CONFIG_SYS_NS16550_COM1			(0x1E784000)
+#define CONFIG_SYS_NS16550_COM1			0x1E784000
 #define CONFIG_SYS_LOADS_BAUD_CHANGE
 #define CONFIG_SERIAL1				1
 #define CONFIG_CONS_INDEX			1
@@ -83,10 +77,8 @@
 
 #define CONFIG_BOOTARGS			"console=ttyS4,115200n8 root=/dev/ram rw"
 
-#define CONFIG_AST_SPI_NOR    /* AST SPI NOR Flash */
-#define CONFIG_FMC_CS			1
-#define CONFIG_SYS_MAX_FLASH_BANKS 	(CONFIG_FMC_CS)
-#define CONFIG_SYS_MAX_FLASH_SECT	(8192)		/* max number of sectors on one chip */
+#define CONFIG_SYS_MAX_FLASH_BANKS 	1
+#define CONFIG_SYS_MAX_FLASH_SECT	8192		/* max number of sectors on one chip */
 #define CONFIG_ENV_IS_IN_FLASH		1
 #define CONFIG_ENV_OFFSET		0x60000	/* environment starts here  */
 #define CONFIG_ENV_ADDR			(CONFIG_SYS_TEXT_BASE + CONFIG_ENV_OFFSET)
@@ -96,7 +88,7 @@
 #define CONFIG_BOOTCOMMAND	"bootm 20080000 20300000"
 #define CONFIG_ENV_OVERWRITE
 
-#define ASPEED_ENV_SETTINGS \
+#define CONFIG_EXTRA_ENV_SETTINGS \
 	"verify=yes\0"	\
 	"spi_dma=yes\0" \
 	""
