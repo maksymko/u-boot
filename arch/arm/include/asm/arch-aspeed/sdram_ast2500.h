@@ -46,12 +46,17 @@
 #define SDRAM_CONF_DDR4			(1 << 4)
 #define SDRAM_CONF_SCRAMBLE		(1 << 8)
 #define SDRAM_CONF_SCRAMBLE_PAT2		(1 << 9)
+#define SDRAM_CONF_CACHE_EN		(1 << 10)
+#define SDRAM_CONF_CACHE_INIT_EN		(1 << 12)
 #define SDRAM_CONF_DUALX8		(1 << 13)
+#define SDRAM_CONF_CACHE_INIT_DONE		(1 << 19)
 
 #define SDRAM_CONF_CAP_128M		0
 #define SDRAM_CONF_CAP_256M		1
 #define SDRAM_CONF_CAP_512M		2
 #define SDRAM_CONF_CAP_1024M		3
+
+#define SDRAM_MISC_DDR4_TREFRESH		(1 << 3)
 
 #define SDRAM_PHYCTRL0_INIT		(1 << 0)
 #define SDRAM_PHYCTRL0_AUTO_UPDATE		(1 << 1)
@@ -79,6 +84,9 @@
 #define SDRAM_TEST_ERRSTOP		(1 << 7)
 #define SDRAM_TEST_DONE		(1 << 12)
 #define SDRAM_TEST_FAIL		(1 << 13)
+
+#define SDRAM_AC_TRFC_SHIFT		0
+#define SDRAM_AC_TRFC_MASK		0xff
 
 #ifndef __ASSEMBLY__
 

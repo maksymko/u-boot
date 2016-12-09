@@ -261,20 +261,33 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 static int ast2500_sdrammc_calibration_end(struct dram_info *info)
 {
 	struct ast2500_sdrammc_regs *regs = info->regs;
-	clrbits_le32(&regs->config, 0x3);
+	u32 trfc = DDR4_TRFC & SDRAM_AC_TRFC_MASK;
 
-	u32 trfc = DDR4_TRFC & 0xff;
+	clrsetbits_le32(&regs->ac_timing[1],
+					(SDRAM_AC_TRFC_MASK << SDRAM_AC_TRFC_SHIFT),
+					(trfc << SDRAM_AC_TRFC_SHIFT));
 
-	u32 ac1 = readl(&regs->ac_timing[1]);
-	ac1 &= ~(0xff);
-	writel(trfc | ac1, &regs->ac_timing[1]);
+	setbits_le32(&regs->config, SDRAM_CONF_CACHE_INIT_EN);
+	while (!(readl(&regs->config) & SDRAM_CONF_CACHE_INIT_DONE)) ;
+	setbits_le32(&regs->config, SDRAM_CONF_CACHE_EN);
 
-	setbits_le32(&regs->config, (1 << 12));
-	while (!(0x80000 & readl(&regs->config))) ;
-	setbits_le32(&regs->config, (1 << 10));
+	writel(SDRAM_MISC_DDR4_TREFRESH, &regs->misc_control);
 
-	writel(0x8, &regs->misc_control);
-	writel(0xffffff00, &regs->req_limit_mask);
+	/* Enable all requests except video & display */
+	writel(SDRAM_REQ_USB20_EHCI1
+		   | SDRAM_REQ_USB20_EHCI2
+		   | SDRAM_REQ_CPU
+		   | SDRAM_REQ_AHB2
+		   | SDRAM_REQ_AHB
+		   | SDRAM_REQ_MAC0
+		   | SDRAM_REQ_MAC1
+		   | SDRAM_REQ_PCIE
+		   | SDRAM_REQ_XDMA
+		   | SDRAM_REQ_ENCRYPTION
+		   | SDRAM_REQ_VIDEO_FLAG
+		   | SDRAM_REQ_VIDEO_LOW_PRI_WRITE
+		   | SDRAM_REQ_2D_RW
+		   | SDRAM_REQ_MEMCHECK, &regs->req_limit_mask);
 
 	return 0;
 }

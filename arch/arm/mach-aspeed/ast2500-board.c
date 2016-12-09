@@ -36,6 +36,10 @@ void lowlevel_init(void)
 
 int mach_cpu_init(void)
 {
+	/*
+	 * The board hangs if I put this in later stages, even in
+	 * board_early_init_f
+	 */
 	debug_uart_init();
 	return stop_wdts();
 }

@@ -200,7 +200,6 @@ static int ast2500_clk_bind(struct udevice *dev)
 	if (ret)
 		debug("Warning: No AST2500 reset driver: ret=%d\n", ret);
 
-	printascii("CLK Bound\r\n");
 	return 0;
 }
 
