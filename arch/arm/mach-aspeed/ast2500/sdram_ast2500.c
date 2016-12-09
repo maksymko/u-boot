@@ -234,8 +234,10 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 	const int write_test_offset = 1024 * 1024;
 	u32 test_pattern = 0xdeadbeef;
 
+	u32 trfc = DDR4_TRFC;
+
 	u32 cap_param = 0;
-	for (; ram_size < SDRAM_MAX_SIZE; ram_size <<= 1, ++cap_param) {
+	for (; ram_size < SDRAM_MAX_SIZE; ram_size <<= 1, ++cap_param, trfc >>= 8) {
 		/* Check if the size can be extended */
 		u32 write_addr =
 		    CONFIG_SYS_SDRAM_BASE + ram_size + write_test_offset;
@@ -249,6 +251,10 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 
 		test_pattern = (test_pattern >> 4) | (test_pattern << 28);
 	}
+
+	clrsetbits_le32(&info->regs->ac_timing[1],
+					(SDRAM_AC_TRFC_MASK << SDRAM_AC_TRFC_SHIFT),
+					((trfc & SDRAM_AC_TRFC_MASK) << SDRAM_AC_TRFC_SHIFT));
 
 	printascii("Calc RAM Size: ");
 	printhex8(ram_size);
@@ -266,11 +272,6 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 static int ast2500_sdrammc_calibration_end(struct dram_info *info)
 {
 	struct ast2500_sdrammc_regs *regs = info->regs;
-	u32 trfc = DDR4_TRFC & SDRAM_AC_TRFC_MASK;
-
-	clrsetbits_le32(&regs->ac_timing[1],
-					(SDRAM_AC_TRFC_MASK << SDRAM_AC_TRFC_SHIFT),
-					(trfc << SDRAM_AC_TRFC_SHIFT));
 
 	setbits_le32(&regs->config, SDRAM_CONF_CACHE_INIT_EN);
 	while (!(readl(&regs->config) & SDRAM_CONF_CACHE_INIT_DONE)) ;
@@ -385,7 +386,7 @@ static int ast2500_sdrammc_probe(struct udevice *dev)
 	if (IS_ERR(priv->scu))
 		return PTR_ERR(priv->scu);
 
-	ulong new_rate = clk_set_rate(&priv->ddr_clk, AST_DDR_FREQ);
+	clk_set_rate(&priv->ddr_clk, AST_DDR_FREQ);
 	ret = ast2500_sdrammc_reset();
 	if (ret)
 		return ret;
