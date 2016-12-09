@@ -68,7 +68,6 @@ static const struct {
 #error "DDR rate is not defined"
 #endif
 
-#define SDRAM_START_ADDR		0x80000000
 #define SDRAM_MAX_SIZE		(1024 * 1024 * 1024)
 
 /*
@@ -233,23 +232,29 @@ static int ast2500_sdrammc_calc_size(struct dram_info *info)
 	/* Initially set the size to minimum supported */
 	ulong ram_size = 128 * 1024 * 1024;
 	const int write_test_offset = 1024 * 1024;
-	const u32 test_pattern = 0xdeadbeef;
+	u32 test_pattern = 0xdeadbeef;
 
 	u32 cap_param = 0;
 	for (; ram_size < SDRAM_MAX_SIZE; ram_size <<= 1, ++cap_param) {
 		/* Check if the size can be extended */
 		u32 write_addr =
-		    SDRAM_START_ADDR + ram_size + write_test_offset;
+		    CONFIG_SYS_SDRAM_BASE + ram_size + write_test_offset;
 		writel(test_pattern, write_addr);
 		if (readl(write_addr) != test_pattern)
 			break;
+
+		/* The pattern needs to be changed to avoid reading correct value because
+		 * of wrapped read rather then correct write.
+		 */
+
+		test_pattern = (test_pattern >> 4) | (test_pattern << 28);
 	}
 
 	printascii("Calc RAM Size: ");
 	printhex8(ram_size);
 	printascii("\r\n");
 
-	info->info.base = SDRAM_START_ADDR;
+	info->info.base = CONFIG_SYS_SDRAM_BASE;
 	info->info.size = ram_size;
 	clrsetbits_le32(&info->regs->config,
 			(SDRAM_CONF_CAP_MASK << SDRAM_CONF_CAP_SHIFT),
