@@ -13,29 +13,32 @@
 #include <linux/err.h>
 
 /* Number of Watchdog Timer ticks before reset */
-#define AST_WDT_RESET_TIMEOUT	(0x10)
-#define AST_WDT_FOR_RESET	(0)
+#define AST_WDT_RESET_TIMEOUT	10
+#define AST_WDT_FOR_RESET	0
 
 static int ast_sysreset_request(struct udevice *dev, enum sysreset_t type)
 {
 	struct ast_wdt *wdt = ast_get_wdt(AST_WDT_FOR_RESET);
+	u32 reset_mode = 0;
 
 	if (IS_ERR(wdt))
 		return PTR_ERR(wdt);
 
-	/* Clear reset mode bits */
-	clrbits_le32(&wdt->ctrl, WDT_RESET_MODE(WDT_CTRL_RESET_MASK));
 	switch (type) {
 	case SYSRESET_WARM:
-		setbits_le32(&wdt->ctrl, WDT_RESET_MODE(WDT_CTRL_RESET_CPU));
+		reset_mode = WDT_CTRL_RESET_CPU;
 		break;
 	case SYSRESET_COLD:
-		setbits_le32(&wdt->ctrl, WDT_RESET_MODE(WDT_CTRL_RESET_CHIP));
+		reset_mode = WDT_CTRL_RESET_CHIP;
 		break;
 	default:
 		return -EPROTONOSUPPORT;
 	}
 
+	/* Clear reset mode bits */
+	clrsetbits_le32(&wdt->ctrl,
+			(WDT_CTRL_RESET_MODE_MASK << WDT_CTRL_RESET_MODE_SHIFT),
+			(reset_mode << WDT_CTRL_RESET_MODE_SHIFT));
 	wdt_start(wdt, AST_WDT_RESET_TIMEOUT);
 
 	return -EINPROGRESS;

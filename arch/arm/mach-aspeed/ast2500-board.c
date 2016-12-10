@@ -8,6 +8,16 @@
 #include <ram.h>
 #include <timer.h>
 
+/* Second Watchdog Timer by default is configured
+ * to trigger secondary boot source.
+ */
+#define AST_2ND_BOOT_WDT		(1)
+
+/* Third Watchdog Timer by default is configured
+ * to toggle Flash address mode switch before reset.
+ */
+#define AST_FLASH_ADDR_DETECT_WDT	(2)
+
 #include <debug_uart.h>
 
 DECLARE_GLOBAL_DATA_PTR;

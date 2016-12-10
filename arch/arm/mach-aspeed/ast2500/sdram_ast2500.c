@@ -103,7 +103,7 @@ static int ast2500_sdrammc_reset(void)
 
   /* Only Reset SDRAM */
   writel(WDT_RESET_SDRAM, &wdt->reset_mask);
-  clrbits_le32(&wdt->ctrl, WDT_CTRL_RESET_MASK << WDT_CTRL_RESET_MODE_OFFSET);
+  clrbits_le32(&wdt->ctrl, WDT_CTRL_RESET_MASK << WDT_CTRL_RESET_MODE_SHIFT);
   wdt_start(wdt, 1);
 
   /* Wait for WDT to reset */
