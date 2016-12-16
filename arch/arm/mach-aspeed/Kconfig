@@ -1,0 +1,15 @@
+if ARCH_ASPEED
+
+config SYS_ARCH
+	default "arm"
+
+config SYS_SOC
+	default "aspeed"
+
+config ASPEED_AST2500
+	bool "Support Aspeed AST2500 SoC"
+	select CPU_ARM1176
+	help
+	  The Aspeed AST2500 is a ARM-based SoC with arm1176 CPU
+
+endif
