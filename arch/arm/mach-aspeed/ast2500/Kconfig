@@ -3,4 +3,11 @@ if ASPEED_AST2500
 config SYS_CPU
 	default "arm1176"
 
+config TARGET_EVB_AST2500
+	bool "Evb-AST2500"
+	help
+	  Evb-AST2500 is Aspeed evaluation board for AST2500 chip.
+
+source "board/aspeed/evb_ast2500/Kconfig"
+
 endif
