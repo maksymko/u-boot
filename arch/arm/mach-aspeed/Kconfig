@@ -12,4 +12,6 @@ config ASPEED_AST2500
 	help
 	  The Aspeed AST2500 is a ARM-based SoC with arm1176 CPU
 
+source "arch/arm/mach-aspeed/ast2500/Kconfig"
+
 endif

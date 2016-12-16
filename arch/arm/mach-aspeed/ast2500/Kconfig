@@ -1,0 +1,6 @@
+if ASPEED_AST2500
+
+config SYS_CPU
+	default "arm1176"
+
+endif
