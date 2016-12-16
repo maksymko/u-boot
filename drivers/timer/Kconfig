@@ -46,4 +46,11 @@ config OMAP_TIMER
 	help
 	  Select this to enable an timer for Omap devices.
 
+config AST_TIMER
+	bool "Aspeed ast2400/ast2500 timer support"
+	depends on TIMER
+	default y if ARCH_ASPEED
+	help
+	  Select this to enable timer for Aspeed ast2400/ast2500 devices.
+
 endmenu
