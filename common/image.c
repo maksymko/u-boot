@@ -1069,17 +1069,6 @@ int boot_get_ramdisk(int argc, char * const argv[], bootm_headers_t *images,
 				return 1;
 			}
 		}
-/// TODO ... Check Why ..................
-#if  defined(CONFIG_ARCH_ASPEED)
-		/*
-		 * We need to copy the ramdisk to SRAM to let Linux boot
-		 */
-		if (rd_data) {
-			memmove ((void *)rd_load, (uchar *)rd_data, rd_len);
-			rd_data = rd_load;
-		}
-#endif /* CONFIG_ASPEED */
-
 	} else if (images->legacy_hdr_valid &&
 			image_check_type(&images->legacy_hdr_os_copy,
 						IH_TYPE_MULTI)) {
@@ -1464,10 +1453,7 @@ int image_setup_linux(bootm_headers_t *images)
 {
 	ulong of_size = images->ft_len;
 	char **of_flat_tree = &images->ft_addr;
-	ulong *initrd_start = &images->initrd_start;
-	ulong *initrd_end = &images->initrd_end;
 	struct lmb *lmb = &images->lmb;
-	ulong rd_len;
 	int ret;
 
 	if (IMAGE_ENABLE_OF_LIBFDT)
@@ -1480,13 +1466,6 @@ int image_setup_linux(bootm_headers_t *images)
 			puts("ERROR with allocation of cmdline\n");
 			return ret;
 		}
-	}
-	if (IMAGE_ENABLE_RAMDISK_HIGH) {
-		rd_len = images->rd_end - images->rd_start;
-		ret = boot_ramdisk_high(lmb, images->rd_start, rd_len,
-				initrd_start, initrd_end);
-		if (ret)
-			return ret;
 	}
 
 	if (IMAGE_ENABLE_OF_LIBFDT) {
