@@ -175,6 +175,13 @@ config PIC32_PINCTRL
 	  by a device tree node which contains both GPIO defintion and pin control
 	  functions.
 
+config ASPEED_AST2500_PINCTRL
+  bool "Aspeed AST2500 pin control driver"
+  depends on DM && ASPEED_AST2500
+  default y
+  help
+    Support pin multiplexing control on Aspeed ast2500 SoC.
+
 endif
 
 source "drivers/pinctrl/meson/Kconfig"
