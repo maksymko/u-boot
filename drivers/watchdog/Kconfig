@@ -1,0 +1,11 @@
+menu "Watchdot Timer Support"
+
+config WDT
+	bool "Enable driver model for watchdog timer drivers"
+	depends on DM
+	help
+	  Enable driver model for watchdog timer. At the moment the API
+	  is very simple and only supports three operations:
+	  start, restart and stop. The uclass is not concerned with
+	  what happends when the timer expires, it is up to a particular
+	  driver.
