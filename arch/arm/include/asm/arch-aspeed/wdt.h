@@ -74,12 +74,6 @@ struct ast_wdt {
 #endif
 };
 
-#ifndef CONFIG_WDT
-void wdt_stop(struct ast_wdt *wdt);
-void wdt_start(struct ast_wdt *wdt, u32 timeout);
-#endif
-
-#ifdef CONFIG_WDT
 /**
  * Given flags parameter passed to wdt_reset or wdt_start uclass functions,
  * gets Reset Mode value from it.
@@ -113,27 +107,6 @@ ulong ast_flags_from_reset_mode_mask(u32 reset_mode, u32 reset_mask);
 
 #endif  /* CONFIG_ASPEED_AST2500 */
 
-#else  /* !CONFIG_WDT */
-
-/**
- * Reset peripherals specified by mask
- *
- * Note, that this is only supported by ast2500 SoC
- *
- * @wdt: watchdog to use for this reset
- * @mask: reset mask.
- */
-int ast_wdt_reset_masked(struct ast_wdt *wdt, u32 mask);
-
-#endif  /* CONFIG_WDT */
-
-/**
- * ast_get_wdt() - get a pointer to watchdog registers
- *
- * @wdt_number: 0-based WDT peripheral number
- * @return pointer to registers or -ve error on error
- */
-struct ast_wdt *ast_get_wdt(u8 wdt_number);
 #endif  /* __ASSEMBLY__ */
 
 #endif /* _ASM_ARCH_WDT_H */
