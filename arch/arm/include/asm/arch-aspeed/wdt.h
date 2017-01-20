@@ -74,8 +74,46 @@ struct ast_wdt {
 #endif
 };
 
+#ifndef CONFIG_WDT
 void wdt_stop(struct ast_wdt *wdt);
 void wdt_start(struct ast_wdt *wdt, u32 timeout);
+#endif
+
+#ifdef CONFIG_WDT
+/**
+ * Given flags parameter passed to wdt_reset or wdt_start uclass functions,
+ * gets Reset Mode value from it.
+ *
+ * @flags: flags parameter passed into wdt_reset or wdt_start
+ * @return Reset Mode value
+ */
+u32 ast_reset_mode_from_flags(ulong flags);
+
+#ifdef CONFIG_ASPEED_AST2500
+/**
+ * Given flags parameter passed to wdt_reset or wdt_start uclass functions,
+ * gets Reset Mask value from it. Reset Mask is only supported on ast2500
+ *
+ * @flags: flags parameter passed into wdt_reset or wdt_start
+ * @return Reset Mask value
+ */
+u32 ast_reset_mask_from_flags(ulong flags);
+
+/**
+ * Given Reset Mask and Reset Mode values, converts them to flags,
+ * suitable for passing into wdt_start or wdt_reset uclass functions.
+ *
+ * On ast2500 Reset Mask is 25 bits wide and Reset Mode is 2 bits wide, so they
+ * can both be packed into single 32 bits wide value.
+ *
+ * @reset_mode: Reset Mode
+ * @reset_mask: Reset Mask
+ */
+ulong ast_flags_from_reset_mode_mask(u32 reset_mode, u32 reset_mask);
+
+#endif  /* CONFIG_ASPEED_AST2500 */
+
+#else  /* !CONFIG_WDT */
 
 /**
  * Reset peripherals specified by mask
@@ -86,6 +124,8 @@ void wdt_start(struct ast_wdt *wdt, u32 timeout);
  * @mask: reset mask.
  */
 int ast_wdt_reset_masked(struct ast_wdt *wdt, u32 mask);
+
+#endif  /* CONFIG_WDT */
 
 /**
  * ast_get_wdt() - get a pointer to watchdog registers
