@@ -19,7 +19,6 @@ struct ast_wdt_priv {
 
 static int ast_wdt_start(struct udevice *dev, u64 timeout, ulong flags)
 {
-    debug("%s(..., %d, %d)\n", __func__, timeout, flags);
     struct ast_wdt_priv *priv = dev_get_priv(dev);
     u32 reset_mode = ast_reset_mode_from_flags(flags);
 
