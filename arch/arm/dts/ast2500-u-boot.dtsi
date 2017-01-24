@@ -29,6 +29,26 @@
 		resets = <&rst AST_RESET_SDRAM>;
 	};
 
+	pinctrl: pinctrl {
+		compatible = "aspeed,ast2500-pinctrl";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		pinctrl_mac0: pinctrl_mac0 {
+			mux {
+				groups = "eth_phy0", "eth_mdio0", "eth_mdc0";
+				function = "eth0";
+			};
+		};
+
+		pinctrl_mac1: pinctrl_mac1 {
+			mux {
+				groups = "eth_phy1", "eth_mdio_mdc1";
+				function = "eth1";
+			};
+		};
+	};
+
 	ahb {
 		u-boot,dm-pre-reloc;
 
