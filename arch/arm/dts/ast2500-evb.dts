@@ -11,6 +11,12 @@
 	chosen {
 		stdout-path = &uart5;
 	};
+
+	aliases {
+		i2c1 = &i2c0;
+		i2c4 = &i2c3;
+		i2c8 = &i2c7;
+	};
 };
 
 &uart5 {
@@ -34,5 +40,17 @@
 
 &wdt3 {
 	u-boot,dm-pre-reloc;
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+};
+
+&i2c3 {
+	status = "okay";
+};
+
+&i2c7 {
 	status = "okay";
 };

@@ -4,6 +4,11 @@
 #include "ast2500.dtsi"
 
 / {
+	aliases {
+		scu = &scu;
+		rst = &rst;
+	};
+
 	scu: clock-controller@1e6e2000 {
 		compatible = "aspeed,ast2500-scu";
 		reg = <0x1e6e2000 0x1000>;
@@ -34,18 +39,94 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		pinctrl_mac0: pinctrl_mac0 {
-			mux {
-				groups = "eth_phy0", "eth_mdio0", "eth_mdc0";
-				function = "eth0";
-			};
+		pinctrl_i2c1_default: i2c1_default {
+			function = "I2C1";
+			groups = "I2C1_SDA", "I2C1_SCL";
 		};
 
-		pinctrl_mac1: pinctrl_mac1 {
-			mux {
-				groups = "eth_phy1", "eth_mdio_mdc1";
-				function = "eth1";
-			};
+		pinctrl_i2c2_default: i2c2_default {
+			function = "I2C2";
+			groups = "I2C2_SDA", "I2C2_SCL";
+		};
+
+		pinctrl_i2c3_default: i2c3_default {
+			function = "I2C3";
+			groups = "I2C3";
+		};
+
+		pinctrl_i2c4_default: i2c4_default {
+			function = "I2C4";
+			groups = "I2C4";
+		};
+
+		pinctrl_i2c5_default: i2c5_default {
+			function = "I2C5";
+			groups = "I2C5";
+		};
+
+		pinctrl_i2c6_default: i2c6_default {
+			function = "I2C6";
+			groups = "I2C6";
+		};
+
+		pinctrl_i2c7_default: i2c7_default {
+			function = "I2C7";
+			groups = "I2C7";
+		};
+
+		pinctrl_i2c8_default: i2c8_default {
+			function = "I2C8";
+			groups = "I2C8";
+		};
+
+		pinctrl_i2c9_default: i2c9_default {
+			function = "I2C9";
+			groups = "I2C9";
+		};
+
+		pinctrl_i2c10_default: i2c10_default {
+			function = "I2C10";
+			groups = "I2C10";
+		};
+
+		pinctrl_i2c11_default: i2c11_default {
+			function = "I2C11";
+			groups = "I2C11";
+		};
+
+		pinctrl_i2c12_default: i2c12_default {
+			function = "I2C12";
+			groups = "I2C12";
+		};
+
+		pinctrl_i2c13_default: i2c13_default {
+			function = "I2C13";
+			groups = "I2C13";
+		};
+
+		pinctrl_i2c14_default: i2c14_default {
+			function = "I2C14";
+			groups = "I2C14";
+		};
+
+		pinctrl_mac1link_default: mac1link_default {
+			function = "MAC1LINK";
+			groups = "MAC1LINK";
+		};
+
+		pinctrl_mac2link_default: mac2link_default {
+			function = "MAC2LINK";
+			groups = "MAC2LINK";
+		};
+
+		pinctrl_mdio1_default: mdio1_default {
+			function = "MDIO1";
+			groups = "MDIO1";
+		};
+
+		pinctrl_mdio2_default: mdio2_default {
+			function = "MDIO2";
+			groups = "MDIO2";
 		};
 	};
 
@@ -80,4 +161,60 @@
 			};
 		};
 	};
+};
+
+&i2c0 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c1 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c2 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c3 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c4 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c5 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c6 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c7 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c8 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c9 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c10 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c11 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c12 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c13 {
+	clocks = <&scu BCLK_PCLK>;
 };
