@@ -14,6 +14,7 @@
 #include <i2c.h>
 #include <reset.h>
 #include <asm/io.h>
+#include <asm/arch/scu_ast2500.h>
 
 #include "ast_i2c.h"
 
@@ -74,12 +75,10 @@ static void ast_i2c_init_bus(struct udevice *dev)
 	/* Reset device */
 	writel(0, &priv->regs->fcr);
 	/* Enable Master Mode. Assuming single-master */
-	debug("Enable Master for %p\n", priv->regs);
 	writel(I2CD_MASTER_EN
 	       | I2CD_M_SDA_LOCK_EN
 	       | I2CD_MULTI_MASTER_DIS | I2CD_M_SCL_DRIVE_EN,
 	       &priv->regs->fcr);
-	debug("FCR: %p\n", readl(&priv->regs->fcr));
 	/* Enable Interrupts */
 	writel(I2CD_INTR_TX_ACK
 	       | I2CD_INTR_TX_NAK
@@ -118,11 +117,19 @@ static int ast_i2c_probe(struct udevice *dev)
 static int ast_i2c_ctrl_probe(struct udevice *dev)
 {
 	struct reset_ctl reset_ctl;
+	struct ast2500_scu *scu;
 	int ret;
 
 	debug("%s\n", __func__);
-	/* Reset all I2C devices */
 
+	/* Get all I2C devices out of Reset */
+	scu = ast_get_scu();
+	ast_scu_unlock(scu);
+	clrbits_le32(&scu->sysreset_ctrl1, SCU_SYSRESET_I2C);
+	ast_scu_lock(scu);
+
+#if 0
+	/* Reset all I2C devices */
 	ret = reset_get_by_index(dev, 0, &reset_ctl);
 	if (ret) {
 		debug("%s(): Failed to get reset signal\n", __func__);
@@ -134,6 +141,7 @@ static int ast_i2c_ctrl_probe(struct udevice *dev)
 		debug("%s(): I2C reset failed: %u\n", __func__, ret);
 		return ret;
 	}
+#endif
 
 	return 0;
 }

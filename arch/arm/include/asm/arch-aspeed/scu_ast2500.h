@@ -51,6 +51,8 @@
 #define SCU_PIN_FUN_SDA1		(1 << 13)
 #define SCU_PIN_FUN_SDA2		(1 << 15)
 
+#define SCU_SYSRESET_I2C		(1 << 2)
+
 #ifndef __ASSEMBLY__
 
 struct ast2500_clk_priv {
