@@ -20,149 +20,105 @@ struct ast2500_pinctrl_priv {
 
 static int ast2500_pinctrl_probe(struct udevice *dev)
 {
-	struct ast2500_pinctrl_priv *priv = (struct ast2500_pinctrl_priv*)dev_get_priv(dev);
+	struct ast2500_pinctrl_priv *priv = dev_get_priv(dev);
 
 	priv->scu = ast_get_scu();
 
 	return 0;
 }
 
-static void pinctrl_ast2500_i2c_config(struct ast2500_scu *scu, int func,
-				       int flags)
-{
-	(void)flags;
+struct ast2500_group_config {
+	char* group_name;
+	/* Control register number (1-10) */
+	unsigned reg_num;
+	/* The shift of the control bit in the register */
+	u32 ctrl_bit_shift;
+};
 
-	if (func >= PERIPH_ID_I2C3) {
-		setbits_le32(&scu->pinmux_ctrl[4],
-			     SCU_PINMUX_CTRL5_I2C << (func - PERIPH_ID_I2C3));
-	}
-	/* Previous versions of the chip have these pins hard wired for I2C */
-#ifdef CONFIG_ASPEED_AST2500
-	if (func == PERIPH_ID_I2C1) {
-		setbits_le32(&scu->pinmux_ctrl1[1], SCU_PIN_FUN_SDA1 | SCU_PIN_FUN_SCL1);
-	} else if (func == PERIPH_ID_I2C2) {
-		setbits_le32(&scu->pinmux_ctrl1[1], SCU_PIN_FUN_SDA2 | SCU_PIN_FUN_SCL2);
-	}
-#endif
+static const struct ast2500_group_config ast2500_groups[] = {
+	{ .group_name = "I2C1_SDA", .reg_num = 8, .ctrl_bit_shift = 13 },
+	{ .group_name = "I2C1_SCL", .reg_num = 8, .ctrl_bit_shift = 12 },
+	{ .group_name = "I2C2_SDA", .reg_num = 8, .ctrl_bit_shift = 15 },
+	{ .group_name = "I2C2_SCL", .reg_num = 8, .ctrl_bit_shift = 14 },
+	{ .group_name = "I2C3", .reg_num = 5, .ctrl_bit_shift = 16 },
+	{ .group_name = "I2C4", .reg_num = 5, .ctrl_bit_shift = 17 },
+	{ .group_name = "I2C5", .reg_num = 5, .ctrl_bit_shift = 18 },
+	{ .group_name = "I2C6", .reg_num = 5, .ctrl_bit_shift = 19 },
+	{ .group_name = "I2C7", .reg_num = 5, .ctrl_bit_shift = 20 },
+	{ .group_name = "I2C8", .reg_num = 5, .ctrl_bit_shift = 21 },
+	{ .group_name = "I2C9", .reg_num = 5, .ctrl_bit_shift = 22 },
+	{ .group_name = "I2C10", .reg_num = 5, .ctrl_bit_shift = 23 },
+	{ .group_name = "I2C11", .reg_num = 5, .ctrl_bit_shift = 24 },
+	{ .group_name = "I2C12", .reg_num = 5, .ctrl_bit_shift = 25 },
+	{ .group_name = "I2C13", .reg_num = 5, .ctrl_bit_shift = 26 },
+	{ .group_name = "I2C14", .reg_num = 5, .ctrl_bit_shift = 27 },
+};
+
+static const char *ast2500_functions[] = {
+	"I2C1",
+	"I2C2",
+	"I2C3",
+	"I2C4",
+	"I2C5",
+	"I2C6",
+	"I2C7",
+	"I2C8",
+	"I2C9",
+	"I2C10",
+	"I2C11",
+	"I2C12",
+	"I2C13",
+	"I2C14",
+};
+
+static int ast2500_pinctrl_get_functions_count(struct udevice *dev)
+{
+	debug("PINCTRL: get_functions_count\n");
+
+	return ARRAY_SIZE(ast2500_functions);
 }
 
-static void pinctrl_ast2500_mac_config(struct ast2500_scu *scu, int func,
-				       int flags)
+static const char* ast2500_pinctrl_get_function_name(struct udevice *dev, unsigned selector)
 {
-	switch (func) {
-	case PERIPH_ID_MAC1:
-#ifdef CONFIG_ASPEED_AST2500
-		setbits_le32(&scu->pinmux_ctrl[0], SCU_PIN_FUN_MAC1_PHY_LINK);
-#else
-		if (readl(&scu->hwstrap) & SCU_HWSTRAP_MAC1_RGMII)
-			setbits_le32(&scu->pinmux_ctrl[0],
-				     SCU_PIN_FUN_MAC1_PHY_LINK);
-		else
-			clrbits_le32(&scu->pinmux_ctrl[0],
-				     SCU_PIN_FUN_MAC1_PHY_LINK);
-#endif
-		setbits_le32(&scu->pinmux_ctrl[2],
-			     SCU_PIN_FUN_MAC1_MDIO | SCU_PIN_FUN_MAC1_MDC);
-		break;
-	case PERIPH_ID_MAC2:
-		setbits_le32(&scu->pinmux_ctrl[0], SCU_PIN_FUN_MAC2_PHY_LINK);
-		setbits_le32(&scu->pinmux_ctrl[4], SCU_PIN_FUN_MAC2_MDIO);
-		break;
-	}
-}
+	debug("PINCTRL: get_function_name %u\n", selector);
 
-static int ast2500_pinctrl_set_state_full(struct udevice *dev, struct udevice *config)
-{
-	struct ast2500_pinctrl_priv *priv = (struct ast2500_pinctrl_priv*)dev_get_priv(dev);
-
-	return -1;
-}
-
-static int ast2500_pinctrl_request(struct udevice *dev, int func, int flags)
-{
-	struct ast2500_pinctrl_priv *priv = (struct ast2500_pinctrl_priv*)dev_get_priv(dev);
-
-	debug("%s: func=%x, flags=%x\n", __func__, func, flags);
-	switch (func) {
-		case PERIPH_ID_I2C1:
-		case PERIPH_ID_I2C2:
-		case PERIPH_ID_I2C3:
-		case PERIPH_ID_I2C4:
-		case PERIPH_ID_I2C5:
-		case PERIPH_ID_I2C6:
-		case PERIPH_ID_I2C7:
-		case PERIPH_ID_I2C8:
-		case PERIPH_ID_I2C9:
-		case PERIPH_ID_I2C10:
-		case PERIPH_ID_I2C11:
-		case PERIPH_ID_I2C12:
-		case PERIPH_ID_I2C13:
-		case PERIPH_ID_I2C14:
-			pinctrl_ast2500_i2c_config(priv->scu, func, flags);
-			break;
-		case PERIPH_ID_MAC1:
-		case PERIPH_ID_MAC2:
-			pinctrl_ast2500_mac_config(priv->scu, func, flags);
-			break;
-		default:
-			return -EINVAL;
-	}
-
-	return 0;
-}
-
-static int ast2500_pinctrl_get_periph_id(struct udevice *dev,
-					 struct udevice *periph)
-{
-	u32 cell;
-	int ret;
-
-	ret = fdtdec_get_int_array(gd->fdt_blob, periph->of_offset, "interrupts",
-				 &cell, 1);
-
-	if (ret < 0)
-		return -EINVAL;
-
-	switch (cell) {
-		case 2:
-			return PERIPH_ID_MAC1;
-		case 3:
-			return PERIPH_ID_MAC2;
-	}
-
-	if (cell >= 12 && cell <= 25)
-		return PERIPH_ID_I2C1 + cell - 12;
-}
-
-static int ast2500_pinctrl_set_state_simple(struct udevice *dev, struct udevice *periph)
-{
-	int func;
-
-	func = ast2500_pinctrl_get_periph_id(dev, periph);
-	if (func < 0)
-		return func;
-
-	return ast2500_pinctrl_request(dev, func, 0);
+	return ast2500_functions[selector];
 }
 
 static int ast2500_pinctrl_get_groups_count(struct udevice *dev)
 {
 	debug("PINCTRL: get_groups_count\n");
 
-	return 5;
+	return ARRAY_SIZE(ast2500_groups);
 }
-
-static const char* ast2500_groups[] = {"eth_phy0", "eth_phy1", "eth_mdio0", "eth_mdc0", "eth_mdc_mdio1"};
 
 static const char* ast2500_pinctrl_get_group_name(struct udevice *dev, unsigned selector)
 {
 	debug("PINCTRL: get_group_name %u\n", selector);
-	return ast2500_groups[selector];
+
+	return ast2500_groups[selector].group_name;
 }
 
-static int ast2500_pinctrl_group_set(struct udevice *dev, unsigned selector, unsigned func_selector)
+static int ast2500_pinctrl_group_set(struct udevice *dev, unsigned selector,
+				     unsigned func_selector)
 {
+	struct ast2500_pinctrl_priv *priv = dev_get_priv(dev);
+	const struct ast2500_group_config *config;
+	u32 *ctrl_reg;
+
 	debug("PINCTRL: group_set <%u, %u>\n", selector, func_selector);
+	if (selector >= ARRAY_SIZE(ast2500_groups))
+		return -EINVAL;
+
+	config = &ast2500_groups[selector];
+	if (config->reg_num > 6)
+		ctrl_reg = &priv->scu->pinmux_ctrl1[config->reg_num - 7];
+	else
+		ctrl_reg = &priv->scu->pinmux_ctrl[config->reg_num - 1];
+
+	ast_scu_unlock(priv->scu);
+	setbits_le32(ctrl_reg, (1 << config->ctrl_bit_shift));
+	ast_scu_lock(priv->scu);
 
 	return 0;
 }
@@ -171,6 +127,8 @@ static struct pinctrl_ops ast2500_pinctrl_ops = {
 	.set_state = pinctrl_generic_set_state,
 	.get_groups_count = ast2500_pinctrl_get_groups_count,
 	.get_group_name = ast2500_pinctrl_get_group_name,
+	.get_functions_count = ast2500_pinctrl_get_functions_count,
+	.get_function_name = ast2500_pinctrl_get_function_name,
 	.pinmux_group_set = ast2500_pinctrl_group_set,
 };
 
