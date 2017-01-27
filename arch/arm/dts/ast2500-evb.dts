@@ -10,6 +10,7 @@
 
 	chosen {
 		stdout-path = &uart5;
+		fru-eeprom = &eeprom0;
 	};
 
 	aliases {
@@ -49,6 +50,11 @@
 
 &i2c3 {
 	status = "okay";
+
+	eeprom0: eeprom@50 {
+		compatible = "atmel,24c08a", "i2c-eeprom";
+		reg = <0x50>;
+	};
 };
 
 &i2c7 {
