@@ -24,4 +24,6 @@
 
 #define CONFIG_ENV_SIZE			0x20000
 
+#define CONFIG_ID_EEPROM
+
 #endif	/* __CONFIG_H */
