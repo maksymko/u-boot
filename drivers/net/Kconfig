@@ -208,4 +208,10 @@ config GMAC_ROCKCHIP
 	  This driver provides Rockchip SoCs network support based on the
 	  Synopsys Designware driver.
 
+config AST_NIC
+	bool "Support Aspeed ast2500/ast2400 NIC"
+	depends on DM_ETH
+	help
+	  Implements ast2500/ast2400 NIC, very limited
+
 endif # NETDEVICES
