@@ -328,4 +328,12 @@ config FEC2_PHY_NORXERR
 	  The PHY does not have a RXERR line (RMII only).
 	  (so program the FEC to ignore it).
 
+config AST_NIC
+	bool "Support Aspeed ast2500/ast2400 NIC"
+	depends on DM_ETH
+	help
+	  This driver provides support for ast2500/ast2400 network devices.
+	  It uses Driver Model and so can support multiple devices on the same SoC.
+	  The device itself is basically a variation of Faraday FTGMAC100.
+
 endif # NETDEVICES
