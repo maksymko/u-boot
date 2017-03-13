@@ -36,3 +36,17 @@
 	u-boot,dm-pre-reloc;
 	status = "okay";
 };
+
+&mac0 {
+	compatible = "aspeed,ast2500-nic";
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_mac1link_default>, <&pinctrl_mdio1_default>;
+};
+
+&mac1 {
+	compatible = "aspeed,ast2500-nic";
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_mac2link_default>, <&pinctrl_mdio2_default>;
+};
