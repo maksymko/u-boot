@@ -37,6 +37,23 @@
 	status = "okay";
 };
 
+&i2c0 {
+	status = "okay";
+};
+
+&i2c3 {
+	status = "okay";
+
+	eeprom0: eeprom@50 {
+		compatible = "atmel,24c08a", "i2c-eeprom";
+		reg = <0x50>;
+	};
+};
+
+&i2c7 {
+	status = "okay";
+};
+
 &mac0 {
 	compatible = "aspeed,ast2500-nic";
 	status = "okay";
