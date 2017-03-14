@@ -63,6 +63,62 @@
 	u-boot,dm-pre-reloc;
 };
 
+&i2c0 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c1 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c2 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c3 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c4 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c5 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c6 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c7 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c8 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c9 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c10 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c11 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c12 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
+&i2c13 {
+	clocks = <&scu BCLK_PCLK>;
+};
+
 &mac0 {
 	clocks = <&scu PCLK_MAC1>, <&scu PLL_D2PLL>;
 };
