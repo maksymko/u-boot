@@ -28,4 +28,10 @@
 
 #define CONFIG_RESET_PHY_R
 
+#define CONFIG_BOOTCOMMAND \
+		"fdt addr 20080000; " \
+		"if fdt get value ramdisk_conf /configurations/conf@1 ramdisk; then " \
+		"    bootm 20080000; else bootm 20080000 20300000; " \
+		"fi"
+
 #endif	/* __CONFIG_H */

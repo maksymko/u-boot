@@ -66,6 +66,10 @@
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
 
 #define CONFIG_BOOTCOMMAND		"bootm 20080000 20300000"
+#define CONFIG_BOOTARGS \
+		"console=ttyS4,115200n8" \
+		" root=/dev/ram rw"
+
 #define CONFIG_ENV_OVERWRITE
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
