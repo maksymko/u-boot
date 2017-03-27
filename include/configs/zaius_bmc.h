@@ -26,4 +26,6 @@
 
 #define CONFIG_ID_EEPROM
 
+#define CONFIG_RESET_PHY_R
+
 #endif	/* __CONFIG_H */

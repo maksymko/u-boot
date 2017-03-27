@@ -7,10 +7,18 @@
 #include <misc.h>
 #include <net.h>
 #include <fdtdec.h>
+#include <asm/io.h>
 #include <dm/uclass.h>
 
 #define ECHECKSUM	(2001)
 #define MACADDR_SIZE	(6)
+
+/* TODO: Move this to GPIO specific file */
+#define AST_GPIO_BASE	(0x1e780000)
+#define GPIO_DVR			(0x0)
+#define GPIO_DDR			(0x4)
+#define GPIO_D3			(1 << 27)
+
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -168,4 +176,12 @@ int mac_read_from_eeprom(void)
 	}
 
 	return 0;
+}
+
+void reset_phy(void)
+{
+	setbits_le32(AST_GPIO_BASE + GPIO_DDR, GPIO_D3);
+	clrbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
+	mdelay(2);
+	setbits_le32(AST_GPIO_BASE + GPIO_DVR, GPIO_D3);
 }
