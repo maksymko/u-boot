@@ -1,0 +1,12 @@
+if TARGET_ZAIUS_BMC
+
+config SYS_BOARD
+	default "zaius_bmc"
+
+config SYS_VENDOR
+	default "aspeed"
+
+config SYS_CONFIG_NAME
+	default "zaius_bmc"
+
+endif

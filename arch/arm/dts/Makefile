@@ -443,7 +443,8 @@ dtb-$(CONFIG_ARCH_BCM283X) += \
 	bcm2836-rpi-2-b.dtb \
 	bcm2837-rpi-3-b.dtb
 
-dtb-$(CONFIG_ARCH_ASPEED) += ast2500-evb.dtb
+dtb-$(CONFIG_ARCH_ASPEED) += ast2500-evb.dtb\
+  ast2500-zaius.dtb
 
 dtb-$(CONFIG_ARCH_STI) += stih410-b2260.dtb
 
