@@ -331,6 +331,7 @@ config FEC2_PHY_NORXERR
 config AST_NIC
 	bool "Support Aspeed ast2500/ast2400 NIC"
 	depends on DM_ETH
+	select PHYLIB
 	help
 	  This driver provides support for ast2500/ast2400 network devices.
 	  It uses Driver Model and so can support multiple devices on the same SoC.
