@@ -20,14 +20,13 @@
 /* Memory Info */
 #define CONFIG_SYS_LOAD_ADDR		0x83000000
 
-#define CONFIG_ENV_IS_NOWHERE
-
 #define CONFIG_ENV_SIZE			0x20000
 
 #define CONFIG_ID_EEPROM
 
 #define CONFIG_RESET_PHY_R
 
+#undef CONFIG_BOOTCOMMAND
 #define CONFIG_BOOTCOMMAND \
 		"fdt addr 20080000; " \
 		"if fdt get value ramdisk_conf /configurations/conf@1 ramdisk; then " \
