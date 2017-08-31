@@ -163,8 +163,8 @@ int mac_read_from_eeprom(void)
 	debug("Number of Addrs: %d\n", fru_iua.num_mac_addrs);
 	for (; i < fru_iua.num_mac_addrs; ++i) {
 		/* env always takes priority */
-		if (!eth_getenv_enetaddr_by_index("eth", i, temp_mac_addr)) {
-			eth_setenv_enetaddr_by_index("eth", i,
+		if (!eth_env_get_enetaddr_by_index("eth", i, temp_mac_addr)) {
+			eth_env_set_enetaddr_by_index("eth", i,
 						     (uint8_t*)fru_mac_addr);
 		} else {
 			debug("eth%daddr already in env\n", i);
