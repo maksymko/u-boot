@@ -55,7 +55,7 @@ static int ast_nic_ofdata_to_platdata(struct udevice *dev)
 	struct ast_nic_priv *priv = dev_get_priv(dev);
 	struct eth_pdata *platdata = dev_get_platdata(dev);
 
-	priv->regs = dev_get_addr_ptr(dev);
+	priv->regs = devfdt_get_addr_ptr(dev);
 	priv->txdes = ast_txdes;
 	priv->rxdes = ast_rxdes;
 	platdata->iobase = (phys_addr_t)priv->regs;
